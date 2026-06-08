@@ -10,6 +10,7 @@ from app.core.config import settings
 from app.core.exceptions import AppException, RateLimitError
 from app.core.logging import bind_context, clear_context, get_logger
 from app.core.maintenance import get_maintenance
+from app.core.metrics import record_request_end, record_request_start
 
 logger = get_logger(__name__)
 
@@ -29,12 +30,15 @@ class RequestTimingMiddleware:
             return
 
         request_id = uuid4()
+        request_id_str = str(request_id)
         method = scope["method"]
         path = scope["path"]
 
+        record_request_start()
+
         # Bind context
         bind_context(
-            request_id=str(request_id),
+            request_id=request_id_str,
             method=method,
             path=path,
         )
@@ -50,6 +54,9 @@ class RequestTimingMiddleware:
             nonlocal status_code
             if message["type"] == "http.response.start":
                 status_code = message["status"]
+                headers = list(message.get("headers", []))
+                headers.append((b"x-request-id", request_id_str.encode()))
+                message = {**message, "headers": headers}
             await send(message)
 
         try:
@@ -62,6 +69,7 @@ class RequestTimingMiddleware:
             raise
         finally:
             duration_ms = maintenance.end_request(request_id, endpoint, is_error)
+            record_request_end(status_code)
 
             # Log request
             if settings.is_debug or is_error:
@@ -166,7 +174,7 @@ class RateLimitMiddleware:
 
         # Skip rate limiting for health checks
         path = scope["path"]
-        if path in ("/health", "/debug/health"):
+        if path in ("/health", "/ready", "/metrics", "/debug/health"):
             await self.app(scope, receive, send)
             return
 

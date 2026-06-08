@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     )
 
     # App
-    APP_NAME: str = "Navaro API"
+    APP_NAME: str = "DUNNAA API"
     APP_VERSION: str = "1.0.0"
     APP_MODE: AppMode = AppMode.DEVELOPMENT
     DEBUG: bool = False
@@ -43,10 +43,10 @@ class Settings(BaseSettings):
     RATE_LIMIT_WINDOW_SECONDS: int = 60
 
     # Database
-    DATABASE_URL: str = "postgresql+asyncpg://navaro:navaro_dev@localhost:5432/navaro"
+    DATABASE_URL: str = "postgresql+asyncpg://dunnaa:dunnaa_dev@localhost:5432/dunnaa"
     DATABASE_POOL_SIZE: int = 5
     DATABASE_MAX_OVERFLOW: int = 10
-    REDIS_PREFIX: str = "navaro:"
+    REDIS_PREFIX: str = "dunnaa:"
 
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
@@ -80,7 +80,7 @@ class Settings(BaseSettings):
     S3_ENDPOINT: str = ""
     S3_ACCESS_KEY: str = ""
     S3_SECRET_KEY: str = ""
-    S3_BUCKET: str = "navaro"
+    S3_BUCKET: str = "DUNNAA"
     S3_PUBLIC_URL: str = ""
 
     @property

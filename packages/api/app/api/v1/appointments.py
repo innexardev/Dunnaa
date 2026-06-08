@@ -7,8 +7,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_db
-from app.dependencies import get_current_user
+from app.api.deps import CurrentUser, DBSession
 from app.models.user import User
 from app.schemas.appointment import (
     AppointmentCreate,
@@ -22,8 +21,8 @@ router = APIRouter(prefix="/appointments", tags=["Appointments"])
 
 @router.get("", response_model=list[AppointmentResponse])
 async def list_user_appointments(
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser,
+    db: DBSession,
     status_filter: str | None = Query(None, alias="status"),
 ) -> list[AppointmentResponse]:
     """List current user's appointments."""
@@ -38,8 +37,8 @@ async def list_user_appointments(
 )
 async def list_establishment_appointments(
     establishment_id: UUID,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser,
+    db: DBSession,
     date_filter: date | None = Query(None, alias="date"),
     staff_id: UUID | None = Query(None),
     status_filter: str | None = Query(None, alias="status"),
@@ -58,8 +57,8 @@ async def list_establishment_appointments(
 @router.post("", response_model=AppointmentResponse, status_code=status.HTTP_201_CREATED)
 async def create_appointment(
     data: AppointmentCreate,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser,
+    db: DBSession,
 ) -> AppointmentResponse:
     """Create new appointment."""
     service = AppointmentService(db)
@@ -78,8 +77,8 @@ async def create_appointment(
 async def update_appointment(
     appointment_id: UUID,
     data: AppointmentUpdate,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser,
+    db: DBSession,
 ) -> AppointmentResponse:
     """Update appointment status."""
     service = AppointmentService(db)
@@ -94,8 +93,8 @@ async def update_appointment(
 @router.delete("/{appointment_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def cancel_appointment(
     appointment_id: UUID,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser,
+    db: DBSession,
     reason: str | None = Query(None),
 ) -> None:
     """Cancel appointment."""
@@ -106,8 +105,8 @@ async def cancel_appointment(
 @router.post("/{appointment_id}/no-show", status_code=status.HTTP_200_OK)
 async def mark_no_show(
     appointment_id: UUID,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser,
+    db: DBSession,
 ) -> dict[str, str]:
     """Mark appointment as no-show (owner/staff only)."""
     # Note: In a real app, we'd verify that current_user is staff or owner of the establishment

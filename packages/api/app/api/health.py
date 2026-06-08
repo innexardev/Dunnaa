@@ -105,14 +105,14 @@ async def readiness_check(db: AsyncSession = Depends(get_db)):
 
 @router.get("/metrics")
 async def metrics():
-    """
-    Prometheus metrics endpoint.
+    """Application metrics for monitoring."""
+    from app.core.metrics import get_metrics
 
-    Returns basic application metrics.
-    """
-    # Basic metrics - can be extended with prometheus_client
+    snap = get_metrics()
     return {
-        "uptime_seconds": 0,  # Would need to track start time
-        "requests_total": 0,  # Would need middleware counter
-        "active_connections": 0,
+        "uptime_seconds": snap.uptime_seconds,
+        "requests_total": snap.requests_total,
+        "requests_4xx": snap.requests_4xx,
+        "requests_5xx": snap.requests_5xx,
+        "active_requests": snap.active_requests,
     }

@@ -1,5 +1,5 @@
 {
-  "name": "navaro",
+  "name": "dunnaa",
   "private": true,
   "scripts": {
     "build": "turbo build",
@@ -7,7 +7,7 @@
     "dev:api": "cd packages/api && python -m uvicorn app.main:app --reload",
     "dev:cliente": "cd apps/cliente && npx expo start",
     "dev:barbeiro": "cd apps/barbeiro && npx expo start",
-    "dev:admin": "cd apps/admin && npm run dev",
+    "dev:admin": "pnpm --filter @dunnaa/admin dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "clean": "turbo clean"

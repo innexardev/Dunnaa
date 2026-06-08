@@ -1,9 +1,5 @@
 """Auth endpoints."""
 
-import random
-import string
-from datetime import UTC, datetime, timedelta
-
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import select
@@ -14,12 +10,10 @@ from app.core.exceptions import InvalidCodeError
 from app.core.logging import get_logger
 from app.core.security import create_access_token, create_refresh_token, decode_refresh_token
 from app.models import User
+from app.services.otp_service import store_code, verify_code as verify_otp
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 logger = get_logger(__name__)
-
-# In-memory verification codes (use Redis in production)
-_verification_codes: dict[str, tuple[str, datetime]] = {}
 
 
 # ─── Schemas ───────────────────────────────────────────────────────────────────
@@ -96,12 +90,8 @@ async def send_verification_code(request: SendCodeRequest) -> SendCodeResponse:
     In development, returns the code in the message.
     In production, sends via SMS.
     """
-    # Generate 6-digit code
-    code = "".join(random.choices(string.digits, k=6))
-    expires_at = datetime.now(UTC) + timedelta(minutes=5)
-
-    # Store code
-    _verification_codes[request.phone] = (code, expires_at)
+    # Generate and store code (Redis with memory fallback)
+    code = await store_code(request.phone)
 
     logger.info("Verification code sent", phone=request.phone)
 
@@ -127,21 +117,8 @@ async def verify_code(request: VerifyCodeRequest, db: DBSession) -> AuthResponse
     Creates new user if phone not registered.
     """
     # Check code
-    stored = _verification_codes.get(request.phone)
-    if not stored:
+    if not await verify_otp(request.phone, request.code):
         raise InvalidCodeError()
-
-    code, expires_at = stored
-
-    if datetime.now(UTC) > expires_at:
-        del _verification_codes[request.phone]
-        raise InvalidCodeError()
-
-    if code != request.code:
-        raise InvalidCodeError()
-
-    # Remove used code
-    del _verification_codes[request.phone]
 
     # Find or create user
     result = await db.execute(select(User).where(User.phone == request.phone))

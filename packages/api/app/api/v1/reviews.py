@@ -6,8 +6,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_db
-from app.dependencies import get_current_user, verify_establishment_owner
+from app.api.deps import CurrentUser, DBSession, verify_establishment_owner
 from app.models.user import User
 from app.schemas.review import (
     ReviewCreate,
@@ -24,8 +23,8 @@ router = APIRouter(prefix="/reviews", tags=["Reviews"])
 @router.post("", response_model=ReviewResponse, status_code=status.HTTP_201_CREATED)
 async def create_review(
     data: ReviewCreate,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser,
+    db: DBSession,
 ) -> ReviewResponse:
     """Create a review."""
     service = ReviewService(db)
@@ -66,8 +65,8 @@ async def list_establishment_reviews(
 
 @router.get("/my", response_model=list[ReviewResponse])
 async def list_my_reviews(
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser,
+    db: DBSession,
 ) -> list[ReviewResponse]:
     """List reviews created by current user."""
     service = ReviewService(db)
@@ -79,8 +78,8 @@ async def list_my_reviews(
 async def update_review(
     review_id: UUID,
     data: ReviewUpdate,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser,
+    db: DBSession,
 ) -> ReviewResponse:
     """Update a review (Author only)."""
     service = ReviewService(db)
@@ -96,8 +95,8 @@ async def update_review(
 async def respond_to_review(
     review_id: UUID,
     data: ReviewOwnerResponse,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser,
+    db: DBSession,
 ) -> ReviewResponse:
     """Respond to a review (Establishment Owner only)."""
     service = ReviewService(db)
@@ -116,7 +115,7 @@ async def respond_to_review(
         raise HTTPException(status_code=404, detail="Review not found")
 
     # 2. Verify ownership
-    await verify_establishment_owner(db, review.establishment_id, current_user.id)
+    await verify_establishment_owner(db, review.establishment_id, current_user)
 
     # 3. Add response
     updated_review = await service.respond(review_id, data.response)

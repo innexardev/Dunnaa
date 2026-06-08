@@ -150,7 +150,7 @@ class WhatsAppService:
 
     async def send_verification_code(self, to_phone: str, code: str) -> bool:
         """Send verification code via WhatsApp."""
-        message = f"🔐 Seu código de verificação Navaro é: *{code}*\n\nVálido por 5 minutos."
+        message = f"🔐 Seu código de verificação DUNNAA é: *{code}*\n\nVálido por 5 minutos."
         return await self.send_text(to_phone, message)
 
 

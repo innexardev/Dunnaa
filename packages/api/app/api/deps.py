@@ -1,6 +1,7 @@
 """API dependencies for route injection."""
 
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -8,9 +9,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.core.exceptions import ForbiddenError, UnauthorizedError
+from app.core.exceptions import ForbiddenError, NotFoundError, UnauthorizedError
+from app.core.logging import bind_context
 from app.core.security import decode_access_token
-from app.models import User, UserRole
+from app.models import Establishment, StaffMember, User, UserRole
 
 security = HTTPBearer()
 
@@ -38,6 +40,8 @@ async def get_current_user(
 
     if not user:
         raise UnauthorizedError("Usuário não encontrado")
+
+    bind_context(user_id=str(user.id), user_role=user.role.value)
 
     return user
 
@@ -101,3 +105,58 @@ async def get_optional_user(
 
 
 OptionalUser = Annotated[User | None, Depends(get_optional_user)]
+
+
+# ─── Establishment Access ──────────────────────────────────────────────────────
+
+
+async def verify_establishment_owner(
+    db: AsyncSession,
+    establishment_id: UUID,
+    user: User,
+) -> Establishment:
+    """Verify that user owns the establishment (or is admin)."""
+    result = await db.execute(select(Establishment).where(Establishment.id == establishment_id))
+    establishment = result.scalar_one_or_none()
+
+    if not establishment:
+        raise NotFoundError("Estabelecimento não encontrado")
+
+    if user.role == UserRole.admin:
+        return establishment
+
+    if establishment.owner_id != user.id:
+        raise ForbiddenError("Sem permissão para esta ação")
+
+    return establishment
+
+
+async def verify_establishment_access(
+    db: AsyncSession,
+    establishment_id: UUID,
+    user: User,
+) -> Establishment:
+    """Verify owner, admin, or active staff access."""
+    result = await db.execute(select(Establishment).where(Establishment.id == establishment_id))
+    establishment = result.scalar_one_or_none()
+
+    if not establishment:
+        raise NotFoundError("Estabelecimento não encontrado")
+
+    if user.role == UserRole.admin:
+        return establishment
+
+    if establishment.owner_id == user.id:
+        return establishment
+
+    staff_result = await db.execute(
+        select(StaffMember.id).where(
+            StaffMember.establishment_id == establishment_id,
+            StaffMember.user_id == user.id,
+            StaffMember.active == True,
+        )
+    )
+    if staff_result.scalar_one_or_none():
+        return establishment
+
+    raise ForbiddenError("Sem permissão para esta ação")

@@ -5,8 +5,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_db
-from app.dependencies import get_current_user
+from app.api.deps import CurrentUser, DBSession
 from app.models.user import User
 from app.schemas.favorite import (
     FavoriteEstablishmentResponse,
@@ -23,8 +22,8 @@ router = APIRouter(prefix="/favorites", tags=["Favorites"])
 @router.post("/establishments", status_code=status.HTTP_200_OK)
 async def toggle_favorite_establishment(
     data: FavoriteEstablishmentToggle,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """Toggle favorite status for an establishment."""
     service = FavoriteService(db)
@@ -35,8 +34,8 @@ async def toggle_favorite_establishment(
 @router.post("/staff", status_code=status.HTTP_200_OK)
 async def toggle_favorite_staff(
     data: FavoriteStaffToggle,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """Toggle favorite status for a staff member."""
     service = FavoriteService(db)
@@ -46,8 +45,8 @@ async def toggle_favorite_staff(
 
 @router.get("", response_model=UserFavoritesResponse)
 async def list_favorites(
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser,
+    db: DBSession,
 ) -> UserFavoritesResponse:
     """List all user favorites."""
     service = FavoriteService(db)

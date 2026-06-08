@@ -6,8 +6,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_db
-from app.dependencies import get_current_user
+from app.api.deps import CurrentUser, DBSession
 from app.models.user import User
 from app.schemas.portfolio import (
     PortfolioImageCreate,
@@ -22,8 +21,8 @@ router = APIRouter(prefix="/portfolio", tags=["Portfolio"])
 @router.post("", response_model=PortfolioImageResponse, status_code=status.HTTP_201_CREATED)
 async def add_portfolio_image(
     data: PortfolioImageCreate,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """Add a new image to the portfolio."""
     service = PortfolioService(db)
@@ -33,8 +32,8 @@ async def add_portfolio_image(
 @router.delete("/{image_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def remove_portfolio_image(
     image_id: UUID,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """Remove an image from the portfolio."""
     service = PortfolioService(db)

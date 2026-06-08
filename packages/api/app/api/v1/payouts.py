@@ -7,8 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_db
-from app.dependencies import get_current_user, verify_establishment_owner
+from app.api.deps import CurrentUser, DBSession, verify_establishment_owner
 from app.models.user import User
 from app.services.payout_service import PayoutService
 
@@ -32,11 +31,11 @@ class PayoutResponse(BaseModel):
 @router.get("/establishments/{establishment_id}/balance")
 async def get_balance(
     establishment_id: UUID,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """Get establishment's withdrawable balance."""
-    await verify_establishment_owner(db, establishment_id, current_user.id)
+    await verify_establishment_owner(db, establishment_id, current_user)
     service = PayoutService(db)
     balance = await service.get_withdrawable_balance(establishment_id)
     return {"available_balance": balance}
@@ -46,11 +45,11 @@ async def get_balance(
 async def request_payout(
     establishment_id: UUID,
     data: PayoutRequest,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """Request a payout."""
-    await verify_establishment_owner(db, establishment_id, current_user.id)
+    await verify_establishment_owner(db, establishment_id, current_user)
     service = PayoutService(db)
     try:
         payout = await service.request_payout(establishment_id, data.amount)
@@ -62,10 +61,10 @@ async def request_payout(
 @router.get("/establishments/{establishment_id}/history")
 async def list_payouts(
     establishment_id: UUID,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """List payout history for an establishment."""
-    await verify_establishment_owner(db, establishment_id, current_user.id)
+    await verify_establishment_owner(db, establishment_id, current_user)
     service = PayoutService(db)
     return await service.list_payouts(establishment_id)

@@ -92,14 +92,14 @@ class SMSService:
 
     async def send_verification_code(self, phone: str, code: str) -> bool:
         """Send verification code SMS."""
-        message = f"Navaro: Seu código é {code}. Válido por 5 minutos."
+        message = f"DUNNAA: Seu código é {code}. Válido por 5 minutos."
         return await self.send(phone, message)
 
     async def send_appointment_confirmation(
         self, phone: str, establishment_name: str, date: str, time: str
     ) -> bool:
         """Send appointment confirmation SMS."""
-        message = f"Navaro: Agendamento confirmado para {date} às {time} em {establishment_name}."
+        message = f"DUNNAA: Agendamento confirmado para {date} às {time} em {establishment_name}."
         return await self.send(phone, message)
 
     async def send_appointment_reminder(
@@ -107,7 +107,7 @@ class SMSService:
     ) -> bool:
         """Send appointment reminder (24h before)."""
         message = (
-            f"Navaro: Lembrete! Você tem agendamento amanhã às {time} em {establishment_name}."
+            f"DUNNAA: Lembrete! Você tem agendamento amanhã às {time} em {establishment_name}."
         )
         return await self.send(phone, message)
 
@@ -115,7 +115,7 @@ class SMSService:
         self, phone: str, establishment_name: str, reason: str | None = None
     ) -> bool:
         """Send appointment cancellation SMS."""
-        message = f"Navaro: Seu agendamento em {establishment_name} foi cancelado."
+        message = f"DUNNAA: Seu agendamento em {establishment_name} foi cancelado."
         if reason:
             message += f" Motivo: {reason}"
         return await self.send(phone, message)
@@ -124,7 +124,7 @@ class SMSService:
         self, phone: str, amount: float, establishment_name: str
     ) -> bool:
         """Send payment confirmation to establishment owner."""
-        message = f"Navaro: Pagamento de R${amount:.2f} recebido em {establishment_name}."
+        message = f"DUNNAA: Pagamento de R${amount:.2f} recebido em {establishment_name}."
         return await self.send(phone, message)
 
 

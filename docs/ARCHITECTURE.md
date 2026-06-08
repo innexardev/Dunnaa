@@ -1,4 +1,4 @@
-# 🏗️ Navaro - Arquitetura para Escalabilidade
+# 🏗️ DUNNAA - Arquitetura para Escalabilidade
 
 ## Opções de Backend
 

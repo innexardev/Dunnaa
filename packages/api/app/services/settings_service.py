@@ -189,7 +189,7 @@ class SettingsService:
             (SettingsKeys.SMTP_USER, "", "Usuário SMTP", False, "email"),
             (SettingsKeys.SMTP_PASSWORD, "", "Senha SMTP", True, "email"),
             (SettingsKeys.SMTP_FROM_EMAIL, "", "Email de origem", False, "email"),
-            (SettingsKeys.SMTP_FROM_NAME, "Navaro", "Nome de origem", False, "email"),
+            (SettingsKeys.SMTP_FROM_NAME, "DUNNAA", "Nome de origem", False, "email"),
             (SettingsKeys.SMTP_USE_TLS, "true", "Usar TLS", False, "email"),
             # Push: FCM
             (SettingsKeys.FCM_ENABLED, "false", "Ativar push notifications via FCM", False, "push"),
@@ -227,10 +227,10 @@ class SettingsService:
             (SettingsKeys.S3_ENDPOINT, "", "S3 Endpoint URL", False, "storage"),
             (SettingsKeys.S3_ACCESS_KEY, "", "S3 Access Key", True, "storage"),
             (SettingsKeys.S3_SECRET_KEY, "", "S3 Secret Key", True, "storage"),
-            (SettingsKeys.S3_BUCKET, "navaro", "S3 Bucket Name", False, "storage"),
+            (SettingsKeys.S3_BUCKET, "DUNNAA", "S3 Bucket Name", False, "storage"),
             (SettingsKeys.S3_PUBLIC_URL, "", "S3 Public URL", False, "storage"),
             # App
-            (SettingsKeys.APP_NAME, "Navaro", "Nome do aplicativo", False, "general"),
+            (SettingsKeys.APP_NAME, "DUNNAA", "Nome do aplicativo", False, "general"),
             (SettingsKeys.SUPPORT_EMAIL, "", "Email de suporte", False, "general"),
             (SettingsKeys.SUPPORT_PHONE, "", "Telefone de suporte", False, "general"),
             (SettingsKeys.TERMS_URL, "", "URL dos Termos de Uso", False, "general"),

@@ -3,6 +3,7 @@
 from fastapi import APIRouter
 
 from app.api.v1 import (
+    admin,
     admin_settings,
     analytics,
     appointments,
@@ -48,3 +49,4 @@ router.include_router(tips.router)
 router.include_router(payments.router, prefix="/payments", tags=["Payments"])
 router.include_router(payouts.router, prefix="/payouts", tags=["Payouts"])
 router.include_router(admin_settings.router)
+router.include_router(admin.router)

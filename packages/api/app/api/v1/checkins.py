@@ -7,8 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_db
-from app.dependencies import get_current_user, verify_establishment_access
+from app.api.deps import CurrentUser, DBSession, verify_establishment_access
 from app.models.establishment import Establishment
 from app.models.notification import NotificationType
 from app.models.user import User
@@ -25,8 +24,8 @@ router = APIRouter()
 )
 async def generate_qr_code(
     establishment_id: UUID,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser,
+    db: DBSession,
 ) -> QRCodeResponse:
     """Generate QR code for check-in (owner/staff only)."""
     await verify_establishment_access(db, establishment_id, current_user)
@@ -39,8 +38,8 @@ async def generate_qr_code(
 @router.post("", response_model=CheckinResponse)
 async def perform_checkin(
     data: CheckinRequest,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser,
+    db: DBSession,
 ) -> CheckinResponse:
     """Perform check-in by scanning QR code."""
     service = CheckinService(db)

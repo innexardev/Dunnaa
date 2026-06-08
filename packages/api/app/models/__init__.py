@@ -1,5 +1,7 @@
 """Models package - export all models."""
 
+from app.models.audit_log import AuditLog
+
 # Base
 # Appointment
 from app.models.appointment import (
@@ -136,4 +138,6 @@ __all__ = [
     "WalletTransaction",
     "TransactionType",
     "TransactionStatus",
+    # Audit
+    "AuditLog",
 ]

@@ -1,4 +1,4 @@
-# 📱 Navaro - Features Completas
+# 📱 DUNNAA - Features Completas
 
 > MVP 1.0 | MVP 1.1 | MVP 2.0 (Plugins)
 
@@ -14,7 +14,7 @@
 
 ---
 
-## �📱 App Cliente (Navaro)
+## �📱 App Cliente (DUNNAA)
 
 ### Autenticação
 | ID | Feature | Versão |
@@ -106,7 +106,7 @@
 
 ---
 
-## 💈 App Barbeiro (Navaro Pro)
+## 💈 App Barbeiro (DUNNAA Pro)
 
 ### Cadastro
 | ID | Feature | Versão |

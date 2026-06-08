@@ -46,7 +46,7 @@ class EmailService:
 
     @property
     def from_name(self) -> str:
-        return get_cached_setting(SettingsKeys.SMTP_FROM_NAME, "Navaro") or "Navaro"
+        return get_cached_setting(SettingsKeys.SMTP_FROM_NAME, "DUNNAA") or "DUNNAA"
 
     @property
     def use_tls(self) -> bool:
@@ -156,7 +156,7 @@ class EmailService:
                     <p>Até lá! 👋</p>
                 </div>
                 <div class="footer">
-                    <p>Este email foi enviado pelo Navaro</p>
+                    <p>Este email foi enviado pelo DUNNAA</p>
                 </div>
             </div>
         </body>

@@ -1,5 +1,6 @@
 """Main FastAPI application entry point."""
 
+import os
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
@@ -14,6 +15,8 @@ from app.core import (
     setup_logging,
     setup_middlewares,
 )
+from app.core.sentry import init_sentry
+from app.services.scheduler import start_scheduler, stop_scheduler
 
 # ─── Application Lifespan ──────────────────────────────────────────────────────
 
@@ -32,13 +35,21 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         environment=settings.ENVIRONMENT,
     )
 
+    init_sentry()
+
     await init_db()
     logger.info("Database initialized")
+
+    if not os.getenv("TESTING"):
+        start_scheduler()
+        logger.info("Background scheduler started")
 
     yield
 
     # Shutdown
     logger.info("Shutting down application")
+    if not os.getenv("TESTING"):
+        stop_scheduler()
     await close_db()
     logger.info("Database connections closed")
 
@@ -76,14 +87,9 @@ def create_app() -> FastAPI:
 def _include_routers(app: FastAPI) -> None:
     """Include all API routers."""
 
-    # Health check (always available)
-    @app.get("/health", tags=["Health"])
-    async def health_check() -> dict[str, str]:
-        """Simple health check endpoint."""
-        return {
-            "status": "healthy",
-            "version": settings.APP_VERSION,
-        }
+    from app.api.health import router as health_router
+
+    app.include_router(health_router)
 
     # API v1 routes
     from app.api.v1 import router as v1_router
@@ -92,9 +98,12 @@ def _include_routers(app: FastAPI) -> None:
 
     # Debug routes (only in maintenance mode)
     if settings.is_maintenance:
-        from app.api.debug import router as debug_router
+        try:
+            from app.api.debug import router as debug_router
 
-        app.include_router(debug_router)
+            app.include_router(debug_router)
+        except ImportError:
+            pass
 
 
 # ─── Application Instance ──────────────────────────────────────────────────────

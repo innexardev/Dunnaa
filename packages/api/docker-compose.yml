@@ -6,12 +6,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: navaro-api
+    container_name: dunnaa-api
     restart: unless-stopped
     ports:
       - "${PORT:-8000}:8000"
     environment:
-      - DATABASE_URL=postgresql+asyncpg://navaro:${DB_PASSWORD:-navaro_dev}@db:5432/navaro
+      - DATABASE_URL=postgresql+asyncpg://dunnaa:${DB_PASSWORD:-dunnaa_dev}@db:5432/dunnaa
       - REDIS_URL=redis://redis:6379/0
       - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
       - ENVIRONMENT=${ENVIRONMENT:-development}
@@ -27,31 +27,31 @@ services:
       retries: 3
       start_period: 10s
     networks:
-      - navaro-network
+      - dunnaa-network
 
   # ─── PostgreSQL ───────────────────────────────────────────────────────────────
   db:
     image: postgres:16-alpine
-    container_name: navaro-db
+    container_name: dunnaa-db
     restart: unless-stopped
     environment:
-      - POSTGRES_USER=navaro
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-navaro_dev}
-      - POSTGRES_DB=navaro
+      - POSTGRES_USER=dunnaa
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-dunnaa_dev}
+      - POSTGRES_DB=dunnaa
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U navaro"]
+      test: ["CMD-SHELL", "pg_isready -U dunnaa"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
-      - navaro-network
+      - dunnaa-network
 
   # ─── Redis ────────────────────────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
-    container_name: navaro-redis
+    container_name: dunnaa-redis
     restart: unless-stopped
     command: redis-server --appendonly yes
     volumes:
@@ -62,22 +62,22 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - navaro-network
+      - dunnaa-network
 
   # ─── Migrations (run once) ────────────────────────────────────────────────────
   migrations:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: navaro-migrations
+    container_name: dunnaa-migrations
     command: ["alembic", "upgrade", "head"]
     environment:
-      - DATABASE_URL=postgresql+asyncpg://navaro:${DB_PASSWORD:-navaro_dev}@db:5432/navaro
+      - DATABASE_URL=postgresql+asyncpg://dunnaa:${DB_PASSWORD:-dunnaa_dev}@db:5432/dunnaa
     depends_on:
       db:
         condition: service_healthy
     networks:
-      - navaro-network
+      - dunnaa-network
     profiles:
       - migrations
 
@@ -86,5 +86,5 @@ volumes:
   redis_data:
 
 networks:
-  navaro-network:
+  dunnaa-network:
     driver: bridge

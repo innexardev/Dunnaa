@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     )
 
     # ─── Application ───────────────────────────────────────────────────────────
-    APP_NAME: str = "Navaro API"
+    APP_NAME: str = "DUNNAA API"
     APP_VERSION: str = "1.0.0"
     APP_MODE: AppMode = AppMode.PRODUCTION
     ENVIRONMENT: Literal["development", "staging", "production"] = "development"
@@ -38,14 +38,14 @@ class Settings(BaseSettings):
     WORKERS: int = 1
 
     # ─── Database ──────────────────────────────────────────────────────────────
-    DATABASE_URL: str = "postgresql+asyncpg://navaro:navaro_dev@localhost:5432/navaro"
+    DATABASE_URL: str = "postgresql+asyncpg://dunnaa:dunnaa_dev@localhost:5432/dunnaa"
     DATABASE_POOL_SIZE: int = 5
     DATABASE_MAX_OVERFLOW: int = 10
     DATABASE_ECHO: bool = False  # Log SQL queries
 
     # ─── Redis ─────────────────────────────────────────────────────────────────
     REDIS_URL: str = "redis://localhost:6379/0"
-    REDIS_PREFIX: str = "navaro:"
+    REDIS_PREFIX: str = "dunnaa:"
 
     # ─── Security ──────────────────────────────────────────────────────────────
     SECRET_KEY: str = "CHANGE-ME-IN-PRODUCTION-USE-STRONG-SECRET"
@@ -55,7 +55,14 @@ class Settings(BaseSettings):
     ADMIN_TOKEN: str = "CHANGE-ME-ADMIN-TOKEN"  # For debug endpoints
 
     # ─── CORS ──────────────────────────────────────────────────────────────────
-    CORS_ORIGINS: list[str] = Field(default=["http://localhost:3000", "http://localhost:8081"])
+    CORS_ORIGINS: list[str] = Field(
+        default=[
+            "http://localhost:3000",
+            "http://localhost:8081",
+            "https://dunnaa.com.br",
+            "https://admin.dunnaa.com.br",
+        ]
+    )
     CORS_ALLOW_CREDENTIALS: bool = True
     CORS_ALLOW_METHODS: list[str] = Field(default=["*"])
     CORS_ALLOW_HEADERS: list[str] = Field(default=["*"])
@@ -75,7 +82,7 @@ class Settings(BaseSettings):
     S3_ENDPOINT: str = ""
     S3_ACCESS_KEY: str = ""
     S3_SECRET_KEY: str = ""
-    S3_BUCKET: str = "navaro"
+    S3_BUCKET: str = "dunnaa"
     S3_PUBLIC_URL: str = ""
 
     # ─── Rate Limiting ─────────────────────────────────────────────────────────

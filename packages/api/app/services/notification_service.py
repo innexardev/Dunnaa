@@ -91,7 +91,7 @@ class NotificationService:
             type=NotificationType.appointment,
             data={"appointment_id": str(appointment.id)},
             send_sms=True,
-            sms_message=f"Navaro: Agendamento confirmado para {date_str} às {time_str} em {establishment.name}.",
+            sms_message=f"DUNNAA: Agendamento confirmado para {date_str} às {time_str} em {establishment.name}.",
         )
 
         # 2. Notify Owner (Push only)
@@ -135,7 +135,7 @@ class NotificationService:
                 message=f"Seu horário em {establishment.name} ({date_str}) foi cancelado.",
                 type=NotificationType.appointment,
                 send_sms=True,
-                sms_message=f"Navaro: Seu agendamento em {establishment.name} foi cancelado.",
+                sms_message=f"DUNNAA: Seu agendamento em {establishment.name} foi cancelado.",
             )
 
         # Notify owner
@@ -191,7 +191,7 @@ class NotificationService:
             message=f"R${amount:.2f} recebido" + (f" de {customer_name}" if customer_name else ""),
             type=NotificationType.payment,
             send_sms=True,
-            sms_message=f"Navaro: Pagamento de R${amount:.2f} recebido em {establishment.name}.",
+            sms_message=f"DUNNAA: Pagamento de R${amount:.2f} recebido em {establishment.name}.",
         )
 
     # ─── Basic Operations ───────────────────────────────────────────────────────

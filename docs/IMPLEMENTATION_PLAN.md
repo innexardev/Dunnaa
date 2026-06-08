@@ -1,8 +1,8 @@
-# 📋 Navaro - Plano de Implementação
+# 📋 DUNNAA - Plano de Implementação
 
 ## Visão Geral
 
-Este documento define o plano de implementação do MVP 1.0 do Navaro.
+Este documento define o plano de implementação do MVP 1.0 do DUNNAA.
 
 ---
 

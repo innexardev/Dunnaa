@@ -1,6 +1,8 @@
-# 🔌 Navaro - API Reference
+# 🔌 DUNNAA - API Reference
 
-**Base URL**: `https://api.navaro.app/api/v1`
+**Base URL**: `https://api.dunnaa.com.br/api/v1`
+
+**Site:** [dunnaa.com.br](https://dunnaa.com.br)
 
 ## Autenticação
 

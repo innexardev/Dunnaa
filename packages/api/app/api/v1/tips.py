@@ -5,7 +5,7 @@ from collections.abc import Sequence
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 
-from app.api.deps import DBSession, get_current_user
+from app.api.deps import CurrentUser, DBSession
 from app.models.appointment import Appointment
 from app.models.payment import PaymentStatus, Tip
 from app.models.staff import StaffMember
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/tips", tags=["Tips"])
 async def create_tip(
     request: TipCreate,
     db: DBSession,
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
 ) -> Tip:
     """Give a tip to a staff member."""
     # Validate staff
@@ -59,7 +59,7 @@ async def create_tip(
 @router.get("/me", response_model=Sequence[TipResponse])
 async def list_my_tips(
     db: DBSession,
-    current_user: User = Depends(get_current_user),
+    current_user: CurrentUser,
 ) -> Sequence[Tip]:
     """List tips given by current user."""
     result = await db.execute(

@@ -1,17 +1,18 @@
-# Navaro
+# DUNNAA
 
-> 💈 Sistema de agendamento e assinaturas para barbearias e salões
+> 💈 Sistema de agendamento e assinaturas para barbearias e salões  
+> 🌐 [dunnaa.com.br](https://dunnaa.com.br)
 
 ## 📱 Apps
 
-- **Navaro** - App para clientes (React Native/Expo)
-- **Navaro Pro** - App para barbeiros (React Native/Expo)
+- **DUNNAA** - App para clientes (React Native/Expo)
+- **DUNNAA Pro** - App para barbeiros (React Native/Expo)
 - **Admin** - Painel administrativo (Next.js)
 
 ## 🏗️ Arquitetura
 
 ```
-navaro/
+dunnaa/
 ├── apps/
 │   ├── cliente/          # App Cliente (Expo)
 │   ├── barbeiro/         # App Barbeiro (Expo)
@@ -37,8 +38,8 @@ navaro/
 
 ```bash
 # Clone o repositório
-git clone https://github.com/seu-usuario/navaro.git
-cd navaro
+git clone https://github.com/seu-usuario/dunnaa.git
+cd dunnaa
 
 # Instale dependências
 pnpm install
@@ -61,6 +62,7 @@ pnpm dev:admin
 
 ## 📚 Documentação
 
+- [**Blueprint do Projeto**](docs/BLUEPRINT.md) — visão, produto, roadmap e estado atual
 - [Arquitetura](docs/ARCHITECTURE.md)
 - [Features](docs/FEATURES.md)
 - [Banco de Dados](docs/DATABASE.md)

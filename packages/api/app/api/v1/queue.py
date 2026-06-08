@@ -6,8 +6,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_db
-from app.dependencies import get_current_user, verify_establishment_access
+from app.api.deps import CurrentUser, DBSession, verify_establishment_access
 from app.models.queue import QueueEntry, QueueStatus
 from app.models.user import User
 from app.schemas.queue import (
@@ -24,8 +23,8 @@ router = APIRouter(prefix="/queue", tags=["Queue"])
 @router.post("", response_model=QueueEntryResponse, status_code=status.HTTP_201_CREATED)
 async def join_queue(
     data: QueueEntryCreate,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser,
+    db: DBSession,
 ) -> QueueEntryResponse:
     """Join the queue of an establishment."""
     service = QueueService(db)
@@ -59,8 +58,8 @@ async def list_establishment_queue(
 
 @router.get("/my", response_model=list[QueueEntryResponse])
 async def list_my_queues(
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser,
+    db: DBSession,
 ) -> list[QueueEntryResponse]:
     """List active queues the user has joined."""
     service = QueueService(db)
@@ -72,8 +71,8 @@ async def list_my_queues(
 async def update_queue_status(
     entry_id: UUID,
     data: QueueStatusUpdate,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser,
+    db: DBSession,
 ) -> QueueEntryResponse:
     """Update queue status (Staff/Owner only)."""
     service = QueueService(db)
@@ -92,8 +91,8 @@ async def update_queue_status(
 @router.delete("/{entry_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def leave_queue(
     entry_id: UUID,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: CurrentUser,
+    db: DBSession,
 ) -> None:
     """Leave the queue."""
     service = QueueService(db)
