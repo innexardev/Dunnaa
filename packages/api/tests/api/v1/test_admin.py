@@ -11,9 +11,7 @@ async def test_admin_dashboard_requires_auth(client: AsyncClient):
 
 
 @pytest.mark.asyncio
-async def test_admin_dashboard_forbidden_for_customer(
-    client: AsyncClient, auth_headers: dict
-):
+async def test_admin_dashboard_forbidden_for_customer(client: AsyncClient, auth_headers: dict):
     response = await client.get("/api/v1/admin/dashboard", headers=auth_headers)
     assert response.status_code == 403
 

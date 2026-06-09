@@ -37,9 +37,7 @@ async def test_plugins_forbidden_for_customer(
 
 
 @pytest.mark.asyncio
-async def test_deactivate_plugin(
-    client: AsyncClient, auth_headers: dict, establishment_id: str
-):
+async def test_deactivate_plugin(client: AsyncClient, auth_headers: dict, establishment_id: str):
     create = await client.post(
         f"/api/v1/establishments/{establishment_id}/plugins",
         json={"plugin_type": "ads", "config": {}},

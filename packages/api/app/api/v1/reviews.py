@@ -175,7 +175,9 @@ async def send_review_to_google(
     return ReviewResponse.model_validate(updated)
 
 
-@router.get("/establishments/{establishment_id}/google-pending", response_model=list[ReviewResponse])
+@router.get(
+    "/establishments/{establishment_id}/google-pending", response_model=list[ReviewResponse]
+)
 async def list_pending_google_reviews(
     establishment_id: UUID,
     current_user: CurrentUser,

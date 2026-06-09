@@ -91,9 +91,7 @@ class AdminService:
         growth_pct = 0.0
         if revenue_prev_30d and float(revenue_prev_30d) > 0:
             growth_pct = round(
-                (float(revenue_30d) - float(revenue_prev_30d))
-                / float(revenue_prev_30d)
-                * 100,
+                (float(revenue_30d) - float(revenue_prev_30d)) / float(revenue_prev_30d) * 100,
                 2,
             )
 

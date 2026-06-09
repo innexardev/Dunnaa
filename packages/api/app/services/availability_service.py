@@ -54,7 +54,9 @@ class AvailabilityService:
             raise ValueError("Estabelecimento não encontrado")
 
         day_key = WEEKDAYS[target_date.weekday()]
-        est_hours = establishment.business_hours.get(day_key) if establishment.business_hours else None
+        est_hours = (
+            establishment.business_hours.get(day_key) if establishment.business_hours else None
+        )
         if not est_hours:
             return []
 

@@ -323,15 +323,11 @@ async def assign_service_staff(
 
     await db.execute(delete(service_staff).where(service_staff.c.service_id == service_id))
     for member in staff_list:
-        await db.execute(
-            insert(service_staff).values(service_id=service_id, staff_id=member.id)
-        )
+        await db.execute(insert(service_staff).values(service_id=service_id, staff_id=member.id))
     await db.commit()
 
     refreshed = await db.execute(
-        select(Service)
-        .where(Service.id == service_id)
-        .options(selectinload(Service.staff_members))
+        select(Service).where(Service.id == service_id).options(selectinload(Service.staff_members))
     )
     updated = refreshed.scalar_one()
     return [

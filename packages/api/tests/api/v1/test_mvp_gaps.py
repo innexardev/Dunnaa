@@ -49,9 +49,7 @@ async def test_search_establishments_by_name(
 
 
 @pytest.mark.asyncio
-async def test_search_history_crud(
-    client: AsyncClient, auth_headers_second_user: dict
-):
+async def test_search_history_crud(client: AsyncClient, auth_headers_second_user: dict):
     resp = await client.post(
         "/api/v1/users/me/search-history",
         json={"query": "barbearia centro"},

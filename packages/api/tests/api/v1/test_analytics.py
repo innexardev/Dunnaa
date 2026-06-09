@@ -6,9 +6,7 @@ from httpx import AsyncClient
 
 @pytest.mark.asyncio
 async def test_analytics_dashboard_requires_auth(client: AsyncClient, establishment_id: str):
-    resp = await client.get(
-        f"/api/v1/analytics/establishments/{establishment_id}/dashboard"
-    )
+    resp = await client.get(f"/api/v1/analytics/establishments/{establishment_id}/dashboard")
     assert resp.status_code == 401
 
 

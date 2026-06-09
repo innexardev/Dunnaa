@@ -44,9 +44,7 @@ async def test_create_subscription_requires_active_establishment(
         )
         session.add(plan)
         await session.flush()
-        session.add(
-            SubscriptionPlanItem(plan_id=plan.id, service_id=svc_id, quantity_per_month=4)
-        )
+        session.add(SubscriptionPlanItem(plan_id=plan.id, service_id=svc_id, quantity_per_month=4))
         await session.commit()
         await session.refresh(plan)
 

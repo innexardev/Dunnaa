@@ -16,9 +16,7 @@ class GoogleReviewService:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def approve_for_google(
-        self, review_id: UUID, establishment_id: UUID
-    ) -> Review | None:
+    async def approve_for_google(self, review_id: UUID, establishment_id: UUID) -> Review | None:
         result = await self.db.execute(
             select(Review).where(
                 Review.id == review_id,

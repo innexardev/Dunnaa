@@ -6,9 +6,7 @@ from httpx import AsyncClient
 
 @pytest.mark.asyncio
 async def test_list_promotions_public(client: AsyncClient, establishment_id: str):
-    resp = await client.get(
-        f"/api/v1/establishments/{establishment_id}/promotions"
-    )
+    resp = await client.get(f"/api/v1/establishments/{establishment_id}/promotions")
     assert resp.status_code == 200
     assert resp.json() == []
 
@@ -70,7 +68,5 @@ async def test_update_and_delete_promotion(
     )
     assert delete.status_code == 204
 
-    listed = await client.get(
-        f"/api/v1/establishments/{establishment_id}/promotions"
-    )
+    listed = await client.get(f"/api/v1/establishments/{establishment_id}/promotions")
     assert listed.json() == []

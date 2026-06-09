@@ -7,9 +7,7 @@ from httpx import AsyncClient
 
 
 @pytest.mark.asyncio
-async def test_create_ad_campaign(
-    client: AsyncClient, auth_headers: dict, establishment_id: str
-):
+async def test_create_ad_campaign(client: AsyncClient, auth_headers: dict, establishment_id: str):
     today = date.today()
     resp = await client.post(
         f"/api/v1/establishments/{establishment_id}/ad-campaigns",

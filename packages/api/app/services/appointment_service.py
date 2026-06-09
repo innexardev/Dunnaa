@@ -26,9 +26,7 @@ class AppointmentService:
 
     async def get_by_id(self, appointment_id: UUID) -> Appointment | None:
         """Get appointment by ID."""
-        result = await self.db.execute(
-            select(Appointment).where(Appointment.id == appointment_id)
-        )
+        result = await self.db.execute(select(Appointment).where(Appointment.id == appointment_id))
         return result.scalar_one_or_none()
 
     async def list_by_user(

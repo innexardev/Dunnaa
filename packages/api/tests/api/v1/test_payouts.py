@@ -47,9 +47,7 @@ async def test_payout_request_minimum_amount(
 
 
 @pytest.mark.asyncio
-async def test_payout_history_empty(
-    client: AsyncClient, auth_headers: dict, establishment_id: str
-):
+async def test_payout_history_empty(client: AsyncClient, auth_headers: dict, establishment_id: str):
     resp = await client.get(
         f"/api/v1/payouts/establishments/{establishment_id}/history",
         headers=auth_headers,

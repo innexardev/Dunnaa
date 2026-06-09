@@ -11,7 +11,9 @@ from app.services.payment_service import PaymentService
 
 
 @pytest.mark.asyncio
-async def test_mercadopago_webhook_http(client: AsyncClient, db_engine, establishment_id, auth_headers):
+async def test_mercadopago_webhook_http(
+    client: AsyncClient, db_engine, establishment_id, auth_headers
+):
     """Mercado Pago webhook marks pending payment as succeeded."""
     Session = async_sessionmaker(bind=db_engine, expire_on_commit=False)
     payment_id = f"mp_test_{uuid4().hex[:8]}"
