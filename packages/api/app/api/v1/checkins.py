@@ -1,16 +1,13 @@
 """Check-ins endpoints."""
 
-from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import CurrentUser, DBSession, verify_establishment_access
 from app.models.establishment import Establishment
 from app.models.notification import NotificationType
-from app.models.user import User
 from app.schemas.checkin import CheckinRequest, CheckinResponse, QRCodeResponse
 from app.services.checkin_service import CheckinService
 from app.services.notification_service import NotificationService

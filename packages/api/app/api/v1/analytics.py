@@ -1,14 +1,11 @@
 """Analytics endpoints."""
 
 from datetime import date, timedelta
-from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Query
 
 from app.api.deps import CurrentUser, DBSession, verify_establishment_owner
-from app.models.user import User
 from app.services.analytics_service import AnalyticsService
 
 router = APIRouter()
