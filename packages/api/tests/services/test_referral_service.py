@@ -1,7 +1,5 @@
 """Referral service unit tests."""
 
-from uuid import uuid4
-
 import pytest
 from sqlalchemy.ext.asyncio import async_sessionmaker
 

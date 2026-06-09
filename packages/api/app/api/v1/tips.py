@@ -2,14 +2,13 @@
 
 from collections.abc import Sequence
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
 
 from app.api.deps import CurrentUser, DBSession
 from app.models.appointment import Appointment
 from app.models.payment import PaymentStatus, Tip
 from app.models.staff import StaffMember
-from app.models.user import User
 from app.schemas.payment import TipCreate, TipResponse
 
 router = APIRouter(prefix="/tips", tags=["Tips"])

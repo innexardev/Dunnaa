@@ -1,7 +1,7 @@
 """In-process request metrics for observability."""
 
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 _start_time = time.monotonic()
 _requests_total = 0

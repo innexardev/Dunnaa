@@ -1,6 +1,6 @@
 """Payout service unit tests."""
 
-from uuid import UUID, uuid4, uuid4
+from uuid import UUID, uuid4
 
 import pytest
 from sqlalchemy.ext.asyncio import async_sessionmaker

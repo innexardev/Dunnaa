@@ -1,12 +1,8 @@
 """Favorite endpoints."""
 
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, status
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, status
 
 from app.api.deps import CurrentUser, DBSession
-from app.models.user import User
 from app.schemas.favorite import (
     FavoriteEstablishmentResponse,
     FavoriteEstablishmentToggle,

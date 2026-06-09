@@ -1,13 +1,10 @@
 """Portfolio endpoints."""
 
-from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, status
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Query, status
 
 from app.api.deps import CurrentUser, DBSession
-from app.models.user import User
 from app.schemas.portfolio import (
     PortfolioImageCreate,
     PortfolioImageResponse,
@@ -43,7 +40,7 @@ async def remove_portfolio_image(
 @router.get("/establishments/{establishment_id}", response_model=PortfolioListResponse)
 async def list_establishment_portfolio(
     establishment_id: UUID,
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db: DBSession,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
 ):
@@ -57,7 +54,7 @@ async def list_establishment_portfolio(
 @router.get("/staff/{staff_id}", response_model=PortfolioListResponse)
 async def list_staff_portfolio(
     staff_id: UUID,
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db: DBSession,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
 ):

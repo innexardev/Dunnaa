@@ -1,14 +1,12 @@
 """Payout endpoints."""
 
-from typing import Annotated, Any
+from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import CurrentUser, DBSession, verify_establishment_owner
-from app.models.user import User
 from app.services.payout_service import PayoutService
 
 router = APIRouter()

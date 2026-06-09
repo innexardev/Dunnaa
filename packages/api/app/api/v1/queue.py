@@ -1,14 +1,11 @@
 """Queue endpoints."""
 
-from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, HTTPException, status
 
 from app.api.deps import CurrentUser, DBSession, verify_establishment_access
 from app.models.queue import QueueEntry, QueueStatus
-from app.models.user import User
 from app.schemas.queue import (
     QueueEntryCreate,
     QueueEntryResponse,
@@ -38,7 +35,7 @@ async def join_queue(
 @router.get("/establishments/{establishment_id}", response_model=QueueListResponse)
 async def list_establishment_queue(
     establishment_id: UUID,
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db: DBSession,
     status_filter: str | None = None,
 ) -> QueueListResponse:
     """List public queue for an establishment."""

@@ -1,13 +1,10 @@
 """Notification endpoints."""
 
-from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, status
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Query, status
 
 from app.api.deps import CurrentUser, DBSession
-from app.models.user import User
 from app.schemas.notification import (
     NotificationListResponse,
     NotificationResponse,

@@ -1,7 +1,5 @@
 """Wallet service unit tests."""
 
-from uuid import UUID
-
 import pytest
 from sqlalchemy.ext.asyncio import async_sessionmaker
 

@@ -8,7 +8,6 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from app.models.establishment import Establishment, EstablishmentStatus
-from app.models.user import User, UserRole
 
 
 async def _activate_establishment(db_engine, establishment_id: str) -> None:

@@ -184,6 +184,8 @@ async def admin_headers(client: AsyncClient, db_engine) -> dict:
     """Create admin user and return auth headers."""
     from uuid import UUID
 
+    from sqlalchemy.ext.asyncio import async_sessionmaker
+
     from app.models.user import User, UserRole
 
     phone = "+5511955555555"
