@@ -117,14 +117,14 @@ Detalhamento completo em [`FEATURES.md`](./FEATURES.md). Resumo:
 | Auth SMS + JWT | C01–C02 | ✅ |
 | Estabelecimentos / serviços / staff | B01–B33 | ✅ |
 | Agendamentos | C34–C35 | ✅ parcial |
-| Disponibilidade / slots | C33 | ⏳ gap |
+| Disponibilidade / slots | C33 | ✅ |
 | Fila virtual | C40–C43 | ✅ |
 | Planos (owner) | B50–B55 | ✅ |
-| Assinatura cliente | C51–C53 | ⏳ gap |
-| Check-in QR + créditos | C60–C61 | ⚠️ parcial |
+| Assinatura cliente | C51–C53 | ✅ |
+| Check-in QR + créditos | C60–C61 | ✅ |
 | Pagamentos | C90–C91 | ✅ |
 | Admin APIs | A01–A14 | ✅ |
-| Busca + histórico | C10–C12 | ⏳ gap |
+| Busca + histórico | C10–C12 | ✅ |
 
 ---
 
@@ -262,7 +262,7 @@ Plano detalhado em [`IMPLEMENTATION_PLAN.md`](./IMPLEMENTATION_PLAN.md). Fases e
 | **0 — Fundação backend** | Sentry, health/metrics, OTP Redis, audit logs, deps unificadas, CI | ✅ |
 | **1 — APIs Admin** | `/admin/*` dashboard, CRUD, pagamentos, audit | ✅ |
 | **2 — Admin web + shared** | Next.js 15, tipos TS, todas as páginas admin | ✅ |
-| **3 — Gaps MVP 1.0 backend** | Assinaturas cliente, slots, check-in créditos, busca | ⏳ |
+| **3 — Gaps MVP 1.0 backend** | Assinaturas cliente, slots, check-in créditos, busca | ✅ |
 | **4 — Testes / CI hardened** | Cobertura 70%+, E2E críticos | ⏳ |
 | **5 — Apps mobile** | Expo cliente + barbeiro | ⏳ |
 | **6 — MVP 1.1** | Gorjetas, Google reviews, referral, promoções | ⏳ |

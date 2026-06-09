@@ -133,18 +133,48 @@ class CheckinService:
             }
 
         # 5. Has appointment - record check-in
+        subscription_usage = None
+        subscription_id = None
+        use_consumed = False
+
+        from app.services.subscription_service import SubscriptionService
+
+        sub_service = SubscriptionService(self.db)
+        active_sub = await sub_service.find_active_for_establishment(user_id, establishment_id)
+
+        if active_sub:
+            try:
+                service_id = appointment.service_id if appointment else None
+                _, usage_row = await sub_service.consume_credit(active_sub, service_id)
+                subscription_id = active_sub.id
+                use_consumed = True
+                summary = await sub_service.build_usage_summary(active_sub)
+                subscription_usage = summary.model_dump()
+            except ValueError as e:
+                msg = str(e).lower()
+                if "diário" in msg or "daily" in msg:
+                    raise ValueError("Limite diário de check-in atingido (1 por dia)")
+                if "mensal" in msg or "monthly" in msg:
+                    raise ValueError("Limite mensal da assinatura atingido")
+                raise
+
         checkin = Checkin(
             user_id=user_id,
             establishment_id=establishment_id,
             appointment_id=appointment.id,
             checked_in_at=datetime.utcnow(),
+            subscription_id=subscription_id,
+            subscription_use_consumed=use_consumed,
         )
         self.db.add(checkin)
         await self.db.commit()
 
-        return {
+        result = {
             "success": True,
             "establishment_id": establishment_id,
             "appointment_id": appointment.id,
             "message": f"Check-in realizado com sucesso em {establishment.name}.",
         }
+        if subscription_usage:
+            result["subscription_usage"] = subscription_usage
+        return result

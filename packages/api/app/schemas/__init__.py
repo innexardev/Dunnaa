@@ -21,9 +21,7 @@ from app.schemas.payment import (
 from app.schemas.service import ServiceCreate, ServiceResponse, ServiceUpdate
 from app.schemas.staff import StaffCreate, StaffResponse, StaffUpdate
 from app.schemas.subscription import (
-    SubscriptionCreate,
-    SubscriptionPlanCreate,
-    SubscriptionPlanResponse,
+    SubscriptionCreateRequest,
     SubscriptionResponse,
 )
 from app.schemas.user import UserResponse, UserUpdate
@@ -49,9 +47,7 @@ __all__ = [
     "StaffCreate",
     "StaffResponse",
     "StaffUpdate",
-    "SubscriptionCreate",
-    "SubscriptionPlanCreate",
-    "SubscriptionPlanResponse",
+    "SubscriptionCreateRequest",
     "SubscriptionResponse",
     "TokenResponse",
     "UserResponse",

@@ -28,3 +28,4 @@ class CheckinResponse(BaseModel):
     appointment_id: UUID | None = None
     queue_position: int | None = None
     message: str | None = None
+    subscription_usage: dict | None = None

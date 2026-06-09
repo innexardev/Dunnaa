@@ -5,7 +5,7 @@ from uuid import UUID
 from fastapi import APIRouter
 from sqlalchemy import select
 
-from app.api.deps import CurrentUser, DBSession
+from app.api.deps import CurrentUser, DBSession, verify_establishment_access
 from app.core.exceptions import ForbiddenError, NotFoundError
 from app.models import Establishment, SubscriptionPlan, SubscriptionPlanItem, UserRole
 from app.schemas.service import (
@@ -13,9 +13,16 @@ from app.schemas.service import (
     SubscriptionPlanResponse,
     SubscriptionPlanUpdate,
 )
+from app.schemas.subscription import SubscriptionResponse
+from app.services.subscription_service import SubscriptionService
 
 router = APIRouter(
     prefix="/establishments/{establishment_id}/subscription-plans", tags=["Subscription Plans"]
+)
+
+owner_subs_router = APIRouter(
+    prefix="/establishments/{establishment_id}/subscriptions",
+    tags=["Subscriptions"],
 )
 
 
@@ -37,7 +44,7 @@ def check_ownership(establishment: Establishment, user: CurrentUser) -> None:
         raise ForbiddenError()
 
 
-# ─── Endpoints ─────────────────────────────────────────────────────────────────
+# ─── Plan endpoints ────────────────────────────────────────────────────────────
 
 
 @router.get("", response_model=list[SubscriptionPlanResponse])
@@ -123,3 +130,37 @@ async def update_plan(
     await db.refresh(plan)
 
     return SubscriptionPlanResponse.model_validate(plan)
+
+
+# ─── Owner: list subscribers (B54) ─────────────────────────────────────────────
+
+
+@owner_subs_router.get("", response_model=list[SubscriptionResponse])
+async def list_establishment_subscriptions(
+    establishment_id: UUID,
+    db: DBSession,
+    current_user: CurrentUser,
+) -> list[SubscriptionResponse]:
+    """List establishment subscribers (B54)."""
+    await verify_establishment_access(db, establishment_id, current_user)
+    service = SubscriptionService(db)
+    subs = await service.list_for_establishment(establishment_id)
+    results = []
+    for sub in subs:
+        usage = await service.build_usage_summary(sub) if sub.status.value == "active" else None
+        results.append(
+            SubscriptionResponse(
+                id=sub.id,
+                user_id=sub.user_id,
+                plan_id=sub.plan_id,
+                establishment_id=sub.establishment_id,
+                status=sub.status,
+                current_period_start=sub.current_period_start,
+                current_period_end=sub.current_period_end,
+                created_at=sub.created_at,
+                cancelled_at=sub.cancelled_at,
+                plan_name=sub.plan.name if sub.plan else None,
+                usage=usage,
+            )
+        )
+    return results

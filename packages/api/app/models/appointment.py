@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Index, Integer, Numeric, String
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Index, Integer, Numeric, String
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -324,6 +324,20 @@ class Checkin(BaseModel):
         DateTime(timezone=True),
         nullable=False,
         doc="Check-in timestamp",
+    )
+
+    subscription_id: Mapped[UUID | None] = mapped_column(
+        PGUUID(as_uuid=True),
+        ForeignKey("subscriptions.id"),
+        nullable=True,
+        doc="Subscription used for this check-in",
+    )
+
+    subscription_use_consumed: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+        doc="Whether a subscription credit was consumed",
     )
 
     # ─── Relationships ─────────────────────────────────────────────────────────

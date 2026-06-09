@@ -198,6 +198,7 @@ async def create_establishment(
 async def list_establishments(
     db: DBSession,
     city: str | None = Query(None),
+    q: str | None = Query(None, min_length=1, description="Search by name (C10)"),
     category: EstablishmentCategory | None = Query(None),
     lat: float | None = Query(None, ge=-90, le=90),
     lng: float | None = Query(None, ge=-180, le=180),
@@ -243,6 +244,8 @@ async def list_establishments(
     # ─── Other Filters ─────────────────────────────────────────────────────────
     if city:
         query = query.where(Establishment.city.ilike(f"%{city}%"))
+    if q:
+        query = query.where(Establishment.name.ilike(f"%{q}%"))
     if category:
         query = query.where(Establishment.category == category)
 

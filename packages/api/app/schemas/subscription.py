@@ -1,6 +1,6 @@
-"""Subscription schemas."""
+"""Subscription schemas aligned with DB models (monthly per-item limits)."""
 
-from datetime import datetime
+from datetime import date, datetime
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -8,62 +8,37 @@ from pydantic import BaseModel, Field
 from app.models.subscription import SubscriptionStatus
 
 
-class SubscriptionPlanBase(BaseModel):
-    """Base subscription plan schema."""
+class SubscriptionPlanItemUsage(BaseModel):
+    """Usage for a single plan item in the current period."""
 
-    name: str = Field(..., max_length=100)
-    description: str | None = Field(None, max_length=500)
-    price: float = Field(..., gt=0)
-    max_uses_per_week: int = Field(..., ge=1, le=30)
-
-
-class SubscriptionPlanCreate(SubscriptionPlanBase):
-    """Create subscription plan schema."""
-
-    service_ids: list[UUID] = Field(
-        ...,
-        min_length=1,
-        description="IDs of services included in this plan",
-    )
+    plan_item_id: UUID
+    service_id: UUID | None
+    bundle_id: UUID | None
+    quantity_per_month: int
+    uses_this_month: int
+    remaining: int
 
 
-class SubscriptionPlanResponse(BaseModel):
-    """Subscription plan response schema."""
+class SubscriptionUsageSummary(BaseModel):
+    """Aggregated usage for a subscription."""
 
-    id: UUID
-    establishment_id: UUID
-    name: str
-    description: str | None
-    price: float
-    max_uses_per_week: int
-    max_uses_per_day: int
-    active: bool
-    created_at: datetime
-
-    model_config = {"from_attributes": True}
+    items: list[SubscriptionPlanItemUsage]
+    period_start: datetime
+    period_end: datetime
 
 
-class SubscriptionCreate(BaseModel):
-    """Create subscription schema."""
+class SubscriptionCreateRequest(BaseModel):
+    """Create customer subscription."""
 
     plan_id: UUID
-    payment_method_id: str = Field(
-        ...,
-        description="Stripe payment method ID",
+    payment_method_id: str | None = Field(
+        None,
+        description="Stripe payment method ID (optional in dev/MVP)",
     )
-
-
-class SubscriptionUsageResponse(BaseModel):
-    """Subscription usage response."""
-
-    uses_this_week: int
-    max_uses_per_week: int
-    uses_today: int
-    max_uses_per_day: int
 
 
 class SubscriptionResponse(BaseModel):
-    """Subscription response schema."""
+    """Customer subscription response."""
 
     id: UUID
     user_id: UUID
@@ -73,8 +48,43 @@ class SubscriptionResponse(BaseModel):
     current_period_start: datetime
     current_period_end: datetime
     created_at: datetime
-    cancelled_at: datetime | None
-    plan: SubscriptionPlanResponse | None = None
-    usage: SubscriptionUsageResponse | None = None
+    cancelled_at: datetime | None = None
+    plan_name: str | None = None
+    usage: SubscriptionUsageSummary | None = None
+
+    model_config = {"from_attributes": True}
+
+
+class AvailabilitySlot(BaseModel):
+    """Available appointment slot."""
+
+    start_at: datetime
+    end_at: datetime
+
+
+class AvailabilityResponse(BaseModel):
+    """Available slots for a staff member on a date."""
+
+    establishment_id: UUID
+    staff_id: UUID
+    service_id: UUID
+    date: date
+    slots: list[AvailabilitySlot]
+
+
+class SearchHistoryCreate(BaseModel):
+    """Record a search query."""
+
+    query: str = Field(..., min_length=1, max_length=255)
+    establishment_clicked_id: UUID | None = None
+
+
+class SearchHistoryResponse(BaseModel):
+    """Search history entry."""
+
+    id: UUID
+    query: str
+    establishment_clicked_id: UUID | None
+    created_at: datetime
 
     model_config = {"from_attributes": True}

@@ -8,8 +8,10 @@ from app.api.v1 import (
     analytics,
     appointments,
     auth,
+    availability,
     bundles,
     checkins,
+    customer_subscriptions,
     establishments,
     favorites,
     notifications,
@@ -19,6 +21,7 @@ from app.api.v1 import (
     products,
     queue,
     reviews,
+    search,
     services,
     staff,
     subscriptions,
@@ -44,6 +47,10 @@ router.include_router(notifications.router)
 router.include_router(checkins.router, prefix="/checkins", tags=["Check-ins"])
 router.include_router(bundles.router)
 router.include_router(subscriptions.router)
+router.include_router(subscriptions.owner_subs_router)
+router.include_router(customer_subscriptions.router)
+router.include_router(availability.router)
+router.include_router(search.router)
 router.include_router(products.router)
 router.include_router(tips.router)
 router.include_router(payments.router, prefix="/payments", tags=["Payments"])
