@@ -7,6 +7,42 @@ from app.models.queue import QueueStatus
 
 
 @pytest.mark.asyncio
+async def test_notifications_read_all(
+    client: AsyncClient,
+    auth_headers: dict,
+    auth_headers_second_user: dict,
+    establishment_id: str,
+):
+    """Mark all notifications as read."""
+    await client.post(
+        "/api/v1/queue",
+        headers=auth_headers_second_user,
+        json={"establishment_id": establishment_id},
+    )
+    from app.models.queue import QueueStatus
+
+    queue = await client.get(
+        f"/api/v1/queue/establishments/{establishment_id}",
+        headers=auth_headers,
+    )
+    entry_id = queue.json()["items"][0]["id"]
+    await client.patch(
+        f"/api/v1/queue/{entry_id}/status",
+        headers=auth_headers,
+        json={"status": QueueStatus.called},
+    )
+
+    resp = await client.patch(
+        "/api/v1/notifications/read-all",
+        headers=auth_headers_second_user,
+    )
+    assert resp.status_code == 200
+
+    listed = await client.get("/api/v1/notifications", headers=auth_headers_second_user)
+    assert listed.json()["unread_count"] == 0
+
+
+@pytest.mark.asyncio
 async def test_notifications_queue_flow(
     client: AsyncClient,
     auth_headers: dict,  # This will be the owner in our setup if we use establishment_id

@@ -4,12 +4,34 @@
 
 ---
 
-## � Modelo de Monetização
+## Backend — Status de implementação (2026-06-08)
+
+| Área | API | Testes | Docs |
+|------|-----|--------|------|
+| Auth + OTP + SMS | ✅ | ✅ | ✅ |
+| Estabelecimentos / Serviços / Staff | ✅ | ✅ | ✅ |
+| Agendamentos / Fila / Check-in | ✅ | ✅ | ✅ |
+| Pagamentos / Wallet / Payouts | ✅ | 🔄 | ✅ |
+| Assinaturas | ✅ | ✅ | ✅ |
+| Promoções | ✅ | ✅ | ✅ |
+| Referrals | ✅ | ✅ | ✅ |
+| Reviews / Favoritos / Portfolio | ✅ | ✅ | ✅ |
+| Admin + Settings | ✅ | ✅ | ✅ |
+| Analytics | ✅ | ✅ | ✅ |
+| Plugins / Ads | ✅ | ✅ | ✅ |
+| Google Reviews sync | ✅ | ✅ | ✅ |
+
+**Cobertura CI:** meta **90%** (`--cov-fail-under=90`). Ver [`BACKEND_COMPLETE.md`](./BACKEND_COMPLETE.md).
+
+---
+
+## 💰 Modelo de Monetização
 
 | Item | Valor |
 |------|-------|
 | **Assinatura Mensal** | R$ 29.99/mês (fixo) |
-| **Taxa por Agendamento** | 5% (sobre agendamento finalizado) |
+| **Taxa avulso** | 8% (configurável) |
+| **Taxa assinatura** | 6% (configurável) |
 | **Ads/Boost** | R$ X/dia (MVP 2.0) |
 
 ---

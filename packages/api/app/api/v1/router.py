@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from app.api.v1 import (
     admin,
     admin_settings,
+    ad_campaigns,
     analytics,
     appointments,
     auth,
@@ -17,9 +18,12 @@ from app.api.v1 import (
     notifications,
     payments,
     payouts,
+    plugins,
     portfolio,
     products,
+    promotions,
     queue,
+    referrals,
     reviews,
     search,
     services,
@@ -53,6 +57,10 @@ router.include_router(availability.router)
 router.include_router(search.router)
 router.include_router(products.router)
 router.include_router(tips.router)
+router.include_router(plugins.router)
+router.include_router(ad_campaigns.router)
+router.include_router(promotions.router)
+router.include_router(referrals.router)
 router.include_router(payments.router, prefix="/payments", tags=["Payments"])
 router.include_router(payouts.router, prefix="/payouts", tags=["Payouts"])
 router.include_router(admin_settings.router)

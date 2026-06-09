@@ -266,7 +266,19 @@ async def list_establishments(
             est.distance = row[1]  # Inject distance for helper
             establishments.append(est)
     else:
-        establishments = result.scalars().all()
+        establishments = list(result.scalars().all())
+
+    # Boost establishments with active ad campaigns (MVP 2.0)
+    from app.services.ad_campaign_service import AdCampaignService
+
+    boosted_ids = await AdCampaignService(db).get_boosted_establishment_ids()
+    if boosted_ids:
+
+        def sort_key(est: Establishment) -> tuple:
+            dist = getattr(est, "distance", None)
+            return (est.id not in boosted_ids, dist if dist is not None else 0)
+
+        establishments.sort(key=sort_key)
 
     return EstablishmentListResponse(
         items=[establishment_to_response(e) for e in establishments],

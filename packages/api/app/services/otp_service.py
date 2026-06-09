@@ -11,7 +11,9 @@ from app.core.logging import get_logger
 logger = get_logger(__name__)
 
 TTL_SECONDS = 300
+MAX_VERIFY_ATTEMPTS = 5
 _memory_store: dict[str, tuple[str, datetime]] = {}
+_attempt_store: dict[str, int] = {}
 
 
 def _redis_key(phone: str) -> str:
@@ -43,6 +45,11 @@ async def store_code(phone: str, code: str | None = None) -> str:
 
 async def verify_code(phone: str, code: str) -> bool:
     """Verify OTP and consume it on success."""
+    attempts = await _get_attempts(phone)
+    if attempts >= MAX_VERIFY_ATTEMPTS:
+        logger.warning("OTP max attempts exceeded", phone=phone)
+        return False
+
     stored = await _get_stored(phone)
     if not stored:
         return False
@@ -52,10 +59,42 @@ async def verify_code(phone: str, code: str) -> bool:
         await delete_code(phone)
         return False
     if otp != code:
+        await _increment_attempts(phone)
         return False
 
     await delete_code(phone)
+    await _clear_attempts(phone)
     return True
+
+
+async def _get_attempts(phone: str) -> int:
+    try:
+        redis = await _get_redis()
+        raw = await redis.get(f"{settings.REDIS_PREFIX}otp_attempts:{phone}")
+        await redis.aclose()
+        return int(raw) if raw else 0
+    except Exception:
+        return _attempt_store.get(phone, 0)
+
+
+async def _increment_attempts(phone: str) -> None:
+    count = await _get_attempts(phone) + 1
+    try:
+        redis = await _get_redis()
+        await redis.setex(f"{settings.REDIS_PREFIX}otp_attempts:{phone}", TTL_SECONDS, str(count))
+        await redis.aclose()
+    except Exception:
+        _attempt_store[phone] = count
+
+
+async def _clear_attempts(phone: str) -> None:
+    try:
+        redis = await _get_redis()
+        await redis.delete(f"{settings.REDIS_PREFIX}otp_attempts:{phone}")
+        await redis.aclose()
+    except Exception:
+        pass
+    _attempt_store.pop(phone, None)
 
 
 async def _get_stored(phone: str) -> tuple[str, datetime] | None:

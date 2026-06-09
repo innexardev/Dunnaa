@@ -7,7 +7,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import CurrentUser, DBSession
+from app.api.deps import CurrentUser, DBSession, verify_establishment_access
 from app.models.user import User
 from app.schemas.appointment import (
     AppointmentCreate,
@@ -44,6 +44,7 @@ async def list_establishment_appointments(
     status_filter: str | None = Query(None, alias="status"),
 ) -> list[AppointmentResponse]:
     """List establishment appointments (owner/staff only)."""
+    await verify_establishment_access(db, establishment_id, current_user)
     service = AppointmentService(db)
     appointments = await service.list_by_establishment(
         establishment_id,
@@ -109,8 +110,11 @@ async def mark_no_show(
     db: DBSession,
 ) -> dict[str, str]:
     """Mark appointment as no-show (owner/staff only)."""
-    # Note: In a real app, we'd verify that current_user is staff or owner of the establishment
     service = AppointmentService(db)
+    appointment = await service.get_by_id(appointment_id)
+    if not appointment:
+        raise HTTPException(status_code=404, detail="Agendamento não encontrado")
+    await verify_establishment_access(db, appointment.establishment_id, current_user)
     success = await service.mark_no_show(appointment_id)
     if not success:
         raise HTTPException(status_code=400, detail="Não foi possível marcar no-show")

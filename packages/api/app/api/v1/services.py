@@ -4,11 +4,13 @@ from uuid import UUID
 
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import delete, insert, select
+from sqlalchemy.orm import selectinload
 
 from app.api.deps import CurrentUser, DBSession
 from app.core.exceptions import ForbiddenError, NotFoundError
-from app.models import Establishment, Service, UserRole
+from app.models import Establishment, Service, StaffMember, UserRole
+from app.models.service import service_staff
 
 router = APIRouter(prefix="/establishments/{establishment_id}/services", tags=["Services"])
 
@@ -238,3 +240,107 @@ async def delete_service(
 
     service.active = False
     await db.commit()
+
+
+class StaffAssignRequest(BaseModel):
+    """Assign staff members to a service."""
+
+    staff_ids: list[UUID] = Field(default_factory=list)
+
+
+class ServiceStaffResponse(BaseModel):
+    """Staff member linked to a service."""
+
+    id: str
+    name: str
+    role: str
+    active: bool
+
+
+@router.get("/{service_id}/staff", response_model=list[ServiceStaffResponse])
+async def list_service_staff(
+    establishment_id: UUID,
+    service_id: UUID,
+    db: DBSession,
+) -> list[ServiceStaffResponse]:
+    """List staff members assigned to a service."""
+    result = await db.execute(
+        select(Service)
+        .where(Service.id == service_id, Service.establishment_id == establishment_id)
+        .options(selectinload(Service.staff_members))
+    )
+    service = result.scalar_one_or_none()
+    if not service:
+        raise NotFoundError("Serviço")
+
+    return [
+        ServiceStaffResponse(
+            id=str(s.id),
+            name=s.name,
+            role=s.role,
+            active=s.active,
+        )
+        for s in service.staff_members
+        if s.active
+    ]
+
+
+@router.put("/{service_id}/staff", response_model=list[ServiceStaffResponse])
+async def assign_service_staff(
+    establishment_id: UUID,
+    service_id: UUID,
+    request: StaffAssignRequest,
+    db: DBSession,
+    current_user: CurrentUser,
+) -> list[ServiceStaffResponse]:
+    """Replace staff assignments for a service (owner only)."""
+    establishment = await get_establishment_or_404(db, establishment_id)
+    check_ownership(establishment, current_user)
+
+    result = await db.execute(
+        select(Service).where(
+            Service.id == service_id,
+            Service.establishment_id == establishment_id,
+        )
+    )
+    service = result.scalar_one_or_none()
+    if not service:
+        raise NotFoundError("Serviço")
+
+    if request.staff_ids:
+        staff_result = await db.execute(
+            select(StaffMember).where(
+                StaffMember.establishment_id == establishment_id,
+                StaffMember.id.in_(request.staff_ids),
+                StaffMember.active == True,
+            )
+        )
+        staff_list = list(staff_result.scalars().all())
+        if len(staff_list) != len(set(request.staff_ids)):
+            raise NotFoundError("Profissional")
+    else:
+        staff_list = []
+
+    await db.execute(delete(service_staff).where(service_staff.c.service_id == service_id))
+    for member in staff_list:
+        await db.execute(
+            insert(service_staff).values(service_id=service_id, staff_id=member.id)
+        )
+    await db.commit()
+
+    refreshed = await db.execute(
+        select(Service)
+        .where(Service.id == service_id)
+        .options(selectinload(Service.staff_members))
+    )
+    updated = refreshed.scalar_one()
+    return [
+        ServiceStaffResponse(
+            id=str(s.id),
+            name=s.name,
+            role=s.role,
+            active=s.active,
+        )
+        for s in updated.staff_members
+        if s.active
+    ]

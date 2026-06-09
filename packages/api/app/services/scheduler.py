@@ -112,6 +112,47 @@ async def send_appointment_reminders() -> int:
     return count
 
 
+async def mark_auto_no_shows(grace_minutes: int = 30) -> int:
+    """Mark confirmed/pending appointments as no-show after grace period."""
+    from app.services.appointment_service import AppointmentService
+
+    logger.info("Running auto no-show job")
+    count = 0
+
+    try:
+        async with async_session_factory() as db:
+            now = datetime.now(UTC)
+            threshold = now - timedelta(minutes=grace_minutes)
+
+            result = await db.execute(
+                select(Appointment).where(
+                    Appointment.scheduled_at < threshold,
+                    Appointment.status.in_(
+                        [AppointmentStatus.pending, AppointmentStatus.confirmed]
+                    ),
+                )
+            )
+            appointments = result.scalars().all()
+            service = AppointmentService(db)
+
+            for appt in appointments:
+                try:
+                    if await service.mark_no_show(appt.id):
+                        count += 1
+                except Exception as e:
+                    logger.error(
+                        "Auto no-show error",
+                        appointment_id=str(appt.id),
+                        error=str(e),
+                    )
+
+    except Exception as e:
+        logger.error("Auto no-show job error", error=str(e))
+
+    logger.info("Auto no-show job completed", count=count)
+    return count
+
+
 async def cleanup_expired_queue_entries() -> int:
     """Clean up queue entries older than 24 hours."""
     logger.info("Running queue cleanup job")
@@ -158,6 +199,10 @@ async def scheduler_loop():
             if current_minute == 0:
                 await send_appointment_reminders()
 
+            # Run auto no-show every hour (at minute 30)
+            if current_minute == 30:
+                await mark_auto_no_shows()
+
             # Run cleanup job at midnight (at minute 5)
             if current_minute == 5 and datetime.now().hour == 0:
                 await cleanup_expired_queue_entries()
@@ -203,4 +248,5 @@ def stop_scheduler():
 async def run_all_jobs():
     """Run all scheduled jobs manually (for testing)."""
     await send_appointment_reminders()
+    await mark_auto_no_shows()
     await cleanup_expired_queue_entries()

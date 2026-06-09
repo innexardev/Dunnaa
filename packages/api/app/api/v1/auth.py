@@ -1,6 +1,6 @@
 """Auth endpoints."""
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
@@ -95,14 +95,22 @@ async def send_verification_code(request: SendCodeRequest) -> SendCodeResponse:
 
     logger.info("Verification code sent", phone=request.phone)
 
-    # In development, return code in message
     if settings.ENVIRONMENT == "development":
         return SendCodeResponse(
             message=f"Código de verificação: {code}",
             expires_in_seconds=300,
         )
 
-    # TODO: Send SMS via Twilio in production
+    from app.services.sms_service import get_sms_service
+
+    sms = get_sms_service()
+    sent = await sms.send_verification_code(request.phone, code)
+    if not sent:
+        raise HTTPException(
+            status_code=503,
+            detail={"code": "SMS_ERROR", "message": "Não foi possível enviar o SMS"},
+        )
+
     return SendCodeResponse(
         message="Código de verificação enviado",
         expires_in_seconds=300,
@@ -149,6 +157,13 @@ async def verify_code(request: VerifyCodeRequest, db: DBSession) -> AuthResponse
         db.add(user)
         await db.commit()
         await db.refresh(user)
+
+        if referred_by_id:
+            from app.services.referral_service import ReferralService
+
+            referral_service = ReferralService(db)
+            await referral_service.create_referral(referred_by_id, user.id)
+
         logger.info(
             "New user created with referral",
             user_id=str(user.id),

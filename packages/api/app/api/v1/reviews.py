@@ -1,13 +1,10 @@
 """Review endpoints."""
 
-from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, HTTPException, Query, status
 
 from app.api.deps import CurrentUser, DBSession, verify_establishment_owner
-from app.models.user import User
 from app.schemas.review import (
     ReviewCreate,
     ReviewListResponse,
@@ -45,7 +42,7 @@ async def create_review(
 @router.get("/establishments/{establishment_id}", response_model=ReviewListResponse)
 async def list_establishment_reviews(
     establishment_id: UUID,
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db: DBSession,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
 ) -> ReviewListResponse:
@@ -120,3 +117,74 @@ async def respond_to_review(
     # 3. Add response
     updated_review = await service.respond(review_id, data.response)
     return ReviewResponse.model_validate(updated_review)
+
+
+@router.post("/{review_id}/approve-google", response_model=ReviewResponse)
+async def approve_review_for_google(
+    review_id: UUID,
+    current_user: CurrentUser,
+    db: DBSession,
+) -> ReviewResponse:
+    """Approve review for Google sync (owner, rating >= 4)."""
+    from sqlalchemy import select
+
+    from app.models.review import Review
+    from app.services.google_review_service import GoogleReviewService
+
+    result = await db.execute(select(Review).where(Review.id == review_id))
+    review = result.scalar_one_or_none()
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found")
+
+    await verify_establishment_owner(db, review.establishment_id, current_user)
+
+    service = GoogleReviewService(db)
+    try:
+        updated = await service.approve_for_google(review_id, review.establishment_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+    return ReviewResponse.model_validate(updated)
+
+
+@router.post("/{review_id}/send-google", response_model=ReviewResponse)
+async def send_review_to_google(
+    review_id: UUID,
+    current_user: CurrentUser,
+    db: DBSession,
+) -> ReviewResponse:
+    """Send approved review to Google (owner)."""
+    from sqlalchemy import select
+
+    from app.models.review import Review
+    from app.services.google_review_service import GoogleReviewService
+
+    result = await db.execute(select(Review).where(Review.id == review_id))
+    review = result.scalar_one_or_none()
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found")
+
+    await verify_establishment_owner(db, review.establishment_id, current_user)
+
+    service = GoogleReviewService(db)
+    try:
+        updated = await service.send_to_google(review_id, review.establishment_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+    return ReviewResponse.model_validate(updated)
+
+
+@router.get("/establishments/{establishment_id}/google-pending", response_model=list[ReviewResponse])
+async def list_pending_google_reviews(
+    establishment_id: UUID,
+    current_user: CurrentUser,
+    db: DBSession,
+) -> list[ReviewResponse]:
+    """List reviews approved but not yet sent to Google (owner)."""
+    await verify_establishment_owner(db, establishment_id, current_user)
+    from app.services.google_review_service import GoogleReviewService
+
+    service = GoogleReviewService(db)
+    reviews = await service.list_pending_sync(establishment_id)
+    return [ReviewResponse.model_validate(r) for r in reviews]

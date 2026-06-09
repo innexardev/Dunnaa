@@ -35,6 +35,7 @@ from app.models.payment import (
 
 # Plugin
 from app.models.plugin import AdCampaign, EstablishmentPlugin
+from app.models.promotion import Promotion
 
 # Portfolio
 from app.models.portfolio import PortfolioImage, SearchHistory
@@ -44,6 +45,8 @@ from app.models.product import Product
 
 # Queue
 from app.models.queue import QueueEntry, QueueStatus
+
+from app.models.referral import Referral
 
 # Review & Favorites
 from app.models.review import Favorite, FavoriteStaff, Review
@@ -130,6 +133,9 @@ __all__ = [
     # Plugin
     "EstablishmentPlugin",
     "AdCampaign",
+    # Promotion & Referral
+    "Promotion",
+    "Referral",
     # Notification
     "Notification",
     "NotificationType",

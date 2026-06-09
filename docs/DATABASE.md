@@ -424,6 +424,9 @@ CREATE INDEX idx_search_user ON search_history(user_id, created_at DESC);
 ## Tabelas de Referral
 
 ### referrals
+
+> Implementado — migration `f7a8b9c0d1e2`
+
 ```sql
 CREATE TABLE referrals (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -440,6 +443,9 @@ CREATE TABLE referrals (
 ## Tabelas de Promoções
 
 ### promotions
+
+> Implementado — migration `f7a8b9c0d1e2`
+
 ```sql
 CREATE TABLE promotions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

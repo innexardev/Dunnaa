@@ -1,14 +1,11 @@
 """Payments endpoints."""
 
-from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, HTTPException, Request, status
 
 from app.core.config import settings
 from app.api.deps import CurrentUser, DBSession, verify_establishment_owner
-from app.models.user import User
 from app.schemas.payment import (
     CreatePaymentIntentRequest,
     CreatePaymentIntentResponse,
@@ -70,7 +67,7 @@ async def create_payment_intent(
 @router.post("/webhooks/mercadopago")
 async def mercadopago_webhook(
     request: Request,
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db: DBSession,
 ) -> dict[str, str]:
     """Handle Mercado Pago webhooks."""
     data = await request.json()
@@ -86,7 +83,7 @@ async def mercadopago_webhook(
 @router.post("/webhooks/stripe")
 async def stripe_webhook(
     request: Request,
-    db: Annotated[AsyncSession, Depends(get_db)],
+    db: DBSession,
 ) -> dict[str, str]:
     """Handle Stripe webhooks."""
     import stripe

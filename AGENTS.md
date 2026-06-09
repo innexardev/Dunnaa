@@ -20,8 +20,8 @@
 | Pacote | Stack | Status |
 |--------|-------|--------|
 | `packages/api` | FastAPI + SQLAlchemy async + PostgreSQL + Redis | Implementado (~90%) |
-| `apps/cliente` | React Native / Expo | A criar |
-| `apps/barbeiro` | React Native / Expo (DUNNAA Pro) | A criar |
+| `apps/cliente` | React Native / Expo | Scaffold (create-expo-app) |
+| `apps/barbeiro` | React Native / Expo (DUNNAA Pro) | Scaffold (create-expo-app) |
 | `apps/admin` | Next.js 15 | Implementado |
 | `packages/shared` | Tipos TypeScript compartilhados | Implementado |
 

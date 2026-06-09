@@ -7,14 +7,26 @@
 
 ## 1. Visão e Propósito
 
-**DUNNAA** é uma plataforma de agendamento, fila virtual e assinaturas para **barbearias e salões de beleza** no Brasil.
+**DUNNAA** é uma plataforma de agendamento, fila virtual, assinaturas e vendas para o **mercado de beleza e grooming** no Brasil — barbearias, salões, manicures, estética e lojas que vendem produtos de beleza.
+
+### Segmentos-alvo
+
+| Segmento | Exemplos | Foco na plataforma |
+|----------|----------|-------------------|
+| **Barbearias** | Corte, barba, degradê | Agendamento, fila, planos mensais de cortes |
+| **Salões de beleza** | Cabelo, coloração, escova, tratamentos | Serviços por profissional, pacotes/combos |
+| **Manicure & nail design** | Manicure, pedicure, alongamento | Slots por profissional, duração por serviço |
+| **Estética & bem-estar** | Sobrancelha, depilação, maquiagem | Mesma engine de agenda + assinaturas |
+| **Lojas de produtos** | Perfumaria, cosméticos, barbearia clássica com retail | Catálogo de produtos + venda avulsa ou no checkout do serviço |
+
+> A plataforma trata todos como **estabelecimentos** com serviços, equipe, agenda e (opcionalmente) produtos. A diferença entre verticais é configurável por **categoria**, **tipo de serviço** e **catálogo** — não exige apps separados.
 
 ### Problema
 
-- Barbearias perdem clientes por filas longas e falta de visibilidade online
+- Estabelecimentos de beleza perdem clientes por filas longas e falta de visibilidade online
 - Clientes não sabem quando há vaga ou quanto tempo esperar
-- Planos mensais (ex.: “2 cortes/mês”) são difíceis de operar sem sistema
-- Donos não têm painel unificado para agenda, equipe, assinantes e financeiro
+- Planos mensais (ex.: “2 cortes/mês”, “1 manicure/semana”) são difíceis de operar sem sistema
+- Donos não têm painel unificado para agenda, equipe, assinantes, **produtos** e financeiro
 
 ### Solução
 
@@ -23,14 +35,14 @@ Três produtos integrados a um backend único:
 | Produto | Público | Função |
 |---------|---------|--------|
 | **DUNNAA** | Cliente final | Buscar, agendar, fila, assinar, check-in QR, pagar |
-| **DUNNAA Pro** | Dono / barbeiro / staff | Gerir estabelecimento, agenda, planos, fila, financeiro |
+| **DUNNAA Pro** | Dono / profissional / staff | Gerir estabelecimento, agenda, planos, fila, produtos, financeiro |
 | **Admin DUNNAA** | Equipe interna | Métricas, moderação, usuários, pagamentos, auditoria |
 
 ### Proposta de valor
 
-1. **Cliente:** agendar em segundos, entrar na fila sem ir físico, assinatura com créditos mensais
-2. **Estabelecimento:** menos no-show, receita recorrente, gestão de equipe e comissões
-3. **Plataforma:** receita via mensalidade SaaS + comissão por transação
+1. **Cliente:** agendar em segundos, entrar na fila, assinar planos, comprar produtos no mesmo fluxo
+2. **Estabelecimento:** menos no-show, receita recorrente (serviços + retail), gestão de equipe e comissões
+3. **Plataforma:** receita via mensalidade SaaS + comissão por transação (serviço e produto)
 
 ---
 
@@ -72,24 +84,61 @@ Gorjetas: 100% ao profissional, sem taxa da plataforma (MVP 1.1).
 
 ---
 
+## 3.5 Categorias de estabelecimento
+
+### Hoje no backend (`EstablishmentCategory`)
+
+| Categoria | Valor API | Descrição |
+|-----------|-----------|-----------|
+| Barbearia | `barbershop` | Foco tradicional em cortes e barba |
+| Salão | `salon` | Salão de beleza feminino/misto |
+| Barbearia + salão | `barber_salon` | Estabelecimento híbrido |
+
+### Roadmap de categorias (expandir enum + filtros)
+
+| Categoria planejada | Valor sugerido | Prioridade |
+|--------------------|----------------|------------|
+| Manicure / nail bar | `nail_salon` | MVP 1.1 |
+| Estética | `aesthetics` | MVP 1.1 |
+| Loja de produtos (sem serviço) | `beauty_store` | MVP 1.1 |
+| Loja + serviços (híbrido retail) | `beauty_retail` | MVP 1.1 |
+
+Filtros de busca no app cliente: por **categoria**, **tipo de serviço** (corte, manicure, coloração…) e **vende produtos** (sim/não).
+
+### Produtos de beleza (retail)
+
+O backend já possui modelo **`Product`** vinculado ao estabelecimento e **`AppointmentProduct`** para incluir produtos no checkout do agendamento.
+
+| Capacidade | Status | Notas |
+|------------|--------|-------|
+| CRUD produtos (owner) | ✅ API | Nome, preço, estoque, imagem |
+| Produtos no agendamento | ✅ API | Add-on no momento do serviço |
+| Catálogo público no app cliente | ⏳ | Listagem + carrinho simples |
+| Loja standalone (só produtos, sem slot) | ⏳ | Pedido avulso / retirada |
+| Comissão sobre venda de produto | ⏳ | Mesma regra 8% avulso (definir) |
+
+---
+
 ## 4. Personas e Jornadas
 
 ### Cliente (Maria)
 
 1. Baixa DUNNAA → login SMS
-2. Busca barbearia por nome ou localização
-3. Vê serviços, profissionais e horários livres
-4. Agenda ou entra na **fila virtual**
-5. No dia: check-in via **QR code**
-6. Avalia atendimento; opcional gorjeta (1.1)
+2. Busca salão, barbearia ou loja por nome, categoria ou localização
+3. Vê serviços, profissionais, produtos e horários livres
+4. Agenda serviço ou entra na **fila virtual**
+5. Opcional: adiciona produtos (shampoo, esmalte, pomada) ao pedido
+6. No dia: check-in via **QR code**
+7. Avalia atendimento; opcional gorjeta (1.1)
 
-### Dono / Barbeiro (João — DUNNAA Pro)
+### Dono / Profissional (João — DUNNAA Pro)
 
-1. Cadastra estabelecimento (nome, endereço, horários, fotos)
-2. Cria serviços, pacotes e planos de assinatura
-3. Adiciona funcionários e define comissões
-4. Gerencia agenda do dia e **modo fila**
-5. Gera QR de check-in; acompanha assinantes e receita
+1. Cadastra estabelecimento (categoria: barbearia, salão, manicure, loja…)
+2. Cria **serviços** (corte, manicure, escova…), **pacotes** e planos de assinatura
+3. Cadastra **produtos** para venda (opcional)
+4. Adiciona funcionários e define comissões
+5. Gerencia agenda do dia e **modo fila**
+6. Gera QR de check-in; acompanha assinantes e receita
 
 ### Admin interno
 
@@ -106,8 +155,8 @@ Detalhamento completo em [`FEATURES.md`](./FEATURES.md). Resumo:
 
 | Versão | Escopo |
 |--------|--------|
-| **MVP 1.0** | Auth SMS, busca, agendamento, fila, assinaturas, check-in QR, favoritos, portfólio, avaliações, pagamentos avulsos |
-| **MVP 1.1** | Gorjetas, avaliação→Google, no-show, notificações inteligentes, referral, promoções |
+| **MVP 1.0** | Auth SMS, busca, agendamento, fila, assinaturas, check-in QR, favoritos, portfólio, avaliações, pagamentos avulsos, produtos no agendamento |
+| **MVP 1.1** | Gorjetas, avaliação→Google, no-show, notificações, referral, promoções, **categorias manicure/loja**, catálogo retail no app |
 | **MVP 2.0** | Sistema de plugins (Ads, Marketing, Analytics Pro) |
 
 ### Features críticas MVP 1.0 (backend)
@@ -136,8 +185,8 @@ Detalhamento completo em [`FEATURES.md`](./FEATURES.md). Resumo:
 dunnaa/
 ├── apps/
 │   ├── admin/              # Next.js 15 — painel interno ✅
-│   ├── cliente/            # Expo — app cliente ⏳
-│   └── barbeiro/           # Expo — DUNNAA Pro ⏳
+│   ├── cliente/            # Expo — app cliente 🔄 scaffold
+│   └── barbeiro/           # Expo — DUNNAA Pro 🔄 scaffold
 ├── packages/
 │   ├── api/                # FastAPI — backend principal ✅
 │   └── shared/             # Tipos TypeScript compartilhados ✅
@@ -264,7 +313,7 @@ Plano detalhado em [`IMPLEMENTATION_PLAN.md`](./IMPLEMENTATION_PLAN.md). Fases e
 | **2 — Admin web + shared** | Next.js 15, tipos TS, todas as páginas admin | ✅ |
 | **3 — Gaps MVP 1.0 backend** | Assinaturas cliente, slots, check-in créditos, busca | ✅ |
 | **4 — Testes / CI hardened** | Cobertura 70%+, E2E críticos | ⏳ |
-| **5 — Apps mobile** | Expo cliente + barbeiro | ⏳ |
+| **5 — Apps mobile** | Expo cliente (MVP telas) + barbeiro (scaffold) | 🔄 |
 | **6 — MVP 1.1** | Gorjetas, Google reviews, referral, promoções | ⏳ |
 | **7 — MVP 2.0** | Plugins (Ads, Marketing, Analytics) | 🔮 |
 
@@ -348,4 +397,4 @@ Codebase derivado do repositório [Navaro](https://github.com/viniciussvasques/n
 
 ---
 
-*DUNNAA — agendamento inteligente para quem corta e para quem é cortado.*
+*DUNNAA — agendamento, beleza e produtos para quem cuida do visual e para quem cuida do cliente.*
