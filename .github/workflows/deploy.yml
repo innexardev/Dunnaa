@@ -13,6 +13,7 @@ on:
       - "packages/api/**"
       - "apps/admin/**"
       - "deploy/**"
+      - ".github/workflows/deploy.yml"
 
 jobs:
   deploy:
@@ -28,6 +29,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           command_timeout: 30m
+          debug: true
           script: |
             set -e
             if [ ! -d /opt/Dunnaa/.git ]; then
