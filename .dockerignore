@@ -1,0 +1,12 @@
+node_modules
+.git
+.github
+**/.next
+**/dist
+apps/cliente
+apps/barbeiro
+packages/api
+deploy
+docs
+*.md
+.turbo

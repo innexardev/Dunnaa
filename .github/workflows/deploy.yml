@@ -1,0 +1,51 @@
+# Deploy DUNNAA para produção (Traefik)
+#
+# Secrets: GitHub → Settings → Secrets and variables → Actions
+# Docs: docs/DEPLOY.md
+
+name: Deploy Production
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - "packages/api/**"
+      - "apps/admin/**"
+      - "deploy/**"
+
+jobs:
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    if: github.repository == 'innexardev/Dunnaa'
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            if [ ! -d /opt/Dunnaa/.git ]; then
+              git clone https://github.com/innexardev/Dunnaa.git /opt/Dunnaa
+            fi
+            cd /opt/Dunnaa
+            git pull origin master
+            cd deploy
+            cat > .env <<EOF
+            TRAEFIK_NETWORK=fixelo_fixelo-network
+            POSTGRES_DB=dunnaa
+            POSTGRES_USER=dunnaa
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            SECRET_KEY=${{ secrets.SECRET_KEY }}
+            STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+            STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}
+            SENTRY_DSN=${{ secrets.SENTRY_DSN }}
+            NVOIP_TOKEN=${{ secrets.NVOIP_TOKEN }}
+            SMS_ENABLED=true
+            LOG_FORMAT=json
+            EOF
+            docker compose up -d --build
+            docker compose exec -T api alembic upgrade head
