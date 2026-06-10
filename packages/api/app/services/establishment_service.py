@@ -1,8 +1,8 @@
 """Establishment service."""
 
-import re
 from uuid import UUID
 
+from slugify import slugify
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -112,9 +112,5 @@ class EstablishmentService:
         return establishment
 
     def _generate_slug(self, name: str) -> str:
-        """Generate URL-friendly slug from name."""
-        slug = name.lower()
-        slug = re.sub(r"[^\w\s-]", "", slug)
-        slug = re.sub(r"[\s_]+", "-", slug)
-        slug = re.sub(r"-+", "-", slug)
-        return slug.strip("-")
+        """Generate URL-friendly ASCII slug from name."""
+        return slugify(name, lowercase=True)

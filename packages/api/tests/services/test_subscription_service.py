@@ -15,10 +15,11 @@ async def test_list_subscriptions_empty(db_engine):
     Session = async_sessionmaker(bind=db_engine, expire_on_commit=False)
     async with Session() as session:
         from app.models.user import User
-        from sqlalchemy import select
 
-        result = await session.execute(select(User).limit(1))
-        user = result.scalar_one()
+        user = User(phone="+5511444000002", referral_code="SUB00001")
+        session.add(user)
+        await session.commit()
+        await session.refresh(user)
 
         service = SubscriptionService(session)
         subs = await service.list_for_user(user.id)

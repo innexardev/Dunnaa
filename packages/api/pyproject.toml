@@ -45,8 +45,9 @@ dependencies = [
     "pillow>=11.0.0",
     "qrcode[pil]>=7.4.0",
     
-    # Logging
+    # Logging & Monitoring
     "structlog>=24.4.0",
+    "sentry-sdk[fastapi]>=2.19.0",
     
     # Retry
     "tenacity>=9.0.0",
