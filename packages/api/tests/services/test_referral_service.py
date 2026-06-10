@@ -1,6 +1,7 @@
 """Referral service unit tests."""
 
 import pytest
+from uuid import uuid4
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from app.models.user import User
@@ -31,3 +32,17 @@ async def test_create_and_claim_referral(db_engine):
 
         with pytest.raises(ValueError, match="já resgatada"):
             await service.claim_reward(referral.id, referrer.id)
+
+
+@pytest.mark.asyncio
+async def test_claim_reward_not_found(db_engine):
+    Session = async_sessionmaker(bind=db_engine, expire_on_commit=False)
+    async with Session() as session:
+        referrer = User(phone="+5511888000003", referral_code="REFCCC03")
+        session.add(referrer)
+        await session.commit()
+        await session.refresh(referrer)
+
+        service = ReferralService(session)
+        with pytest.raises(ValueError, match="não encontrada"):
+            await service.claim_reward(uuid4(), referrer.id)
