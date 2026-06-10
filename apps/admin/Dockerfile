@@ -8,6 +8,7 @@ FROM base AS builder
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/admin ./apps/admin
 COPY packages/shared ./packages/shared
+RUN mkdir -p apps/admin/public
 RUN pnpm install --frozen-lockfile
 ARG NEXT_PUBLIC_API_URL=https://api.dunnaa.com.br/api/v1
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
