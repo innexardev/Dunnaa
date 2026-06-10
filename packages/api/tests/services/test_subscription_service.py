@@ -66,9 +66,7 @@ async def test_create_subscription_requires_active_establishment(
 
 
 @pytest.mark.asyncio
-async def test_subscription_cancel_and_duplicate(
-    db_engine, establishment_id, service_id
-):
+async def test_subscription_cancel_and_duplicate(db_engine, establishment_id, service_id):
     Session = async_sessionmaker(bind=db_engine, expire_on_commit=False)
     est_id = UUID(str(establishment_id))
     svc_id = UUID(str(service_id))
@@ -108,9 +106,7 @@ async def test_subscription_cancel_and_duplicate(
 
 
 @pytest.mark.asyncio
-async def test_subscription_usage_and_consume_credit(
-    db_engine, establishment_id, service_id
-):
+async def test_subscription_usage_and_consume_credit(db_engine, establishment_id, service_id):
     Session = async_sessionmaker(bind=db_engine, expire_on_commit=False)
     est_id = UUID(str(establishment_id))
     svc_id = UUID(str(service_id))

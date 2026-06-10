@@ -86,9 +86,7 @@ class TestSMSService:
             )
             is True
         )
-        assert (
-            await sms_service.send_payment_received("+5511999999999", 50.0, "Barbearia") is True
-        )
+        assert await sms_service.send_payment_received("+5511999999999", 50.0, "Barbearia") is True
 
     def test_get_sms_service_singleton(self):
         import app.services.sms_service as sms_module
