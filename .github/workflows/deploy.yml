@@ -1,5 +1,5 @@
 # Deploy DUNNAA para produção (Traefik)
-#
+# Dispara em push para master (packages/api, apps/admin, deploy) ou manualmente.
 # Secrets: GitHub → Settings → Secrets and variables → Actions
 # Docs: docs/DEPLOY.md
 
