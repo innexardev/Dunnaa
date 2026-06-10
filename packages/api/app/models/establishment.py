@@ -20,6 +20,10 @@ class EstablishmentCategory(str, enum.Enum):
     barbershop = "barbershop"
     salon = "salon"
     barber_salon = "barber_salon"
+    nail_salon = "nail_salon"
+    aesthetics = "aesthetics"
+    beauty_store = "beauty_store"
+    beauty_retail = "beauty_retail"
 
 
 class EstablishmentStatus(str, enum.Enum):

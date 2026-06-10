@@ -2,7 +2,7 @@
 
 from uuid import UUID
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
@@ -10,6 +10,7 @@ from app.api.deps import CurrentUser, DBSession
 from app.core.exceptions import ForbiddenError, NotFoundError
 from app.models import Establishment, StaffBlock, StaffMember, UserRole
 from app.schemas.staff import StaffBlockCreate, StaffBlockResponse
+from app.services.staff_service import StaffService
 
 router = APIRouter(prefix="/establishments/{establishment_id}/staff", tags=["Staff"])
 
@@ -40,6 +41,13 @@ class StaffUpdate(BaseModel):
     active: bool | None = None
 
 
+class StaffLinkRequest(BaseModel):
+    """Link staff member to a user account."""
+
+    user_id: UUID | None = None
+    phone: str | None = Field(None, max_length=20)
+
+
 class StaffResponse(BaseModel):
     """Staff response."""
 
@@ -51,6 +59,7 @@ class StaffResponse(BaseModel):
     work_schedule: dict
     commission_rate: float | None
     active: bool
+    user_id: str | None = None
 
     class Config:
         from_attributes = True
@@ -74,6 +83,20 @@ def check_ownership(establishment: Establishment, user: CurrentUser) -> None:
         raise ForbiddenError()
 
 
+def _staff_response(staff: StaffMember) -> StaffResponse:
+    return StaffResponse(
+        id=str(staff.id),
+        name=staff.name,
+        phone=staff.phone,
+        role=staff.role,
+        avatar_url=staff.avatar_url,
+        work_schedule=staff.work_schedule,
+        commission_rate=float(staff.commission_rate) if staff.commission_rate else None,
+        active=staff.active,
+        user_id=str(staff.user_id) if staff.user_id else None,
+    )
+
+
 # ─── Endpoints ─────────────────────────────────────────────────────────────────
 
 
@@ -94,19 +117,7 @@ async def list_staff(
     result = await db.execute(query)
     staff = result.scalars().all()
 
-    return [
-        StaffResponse(
-            id=str(s.id),
-            name=s.name,
-            phone=s.phone,
-            role=s.role,
-            avatar_url=s.avatar_url,
-            work_schedule=s.work_schedule,
-            commission_rate=float(s.commission_rate) if s.commission_rate else None,
-            active=s.active,
-        )
-        for s in staff
-    ]
+    return [_staff_response(s) for s in staff]
 
 
 @router.post("", response_model=StaffResponse, status_code=201)
@@ -134,16 +145,7 @@ async def create_staff(
     await db.commit()
     await db.refresh(staff)
 
-    return StaffResponse(
-        id=str(staff.id),
-        name=staff.name,
-        phone=staff.phone,
-        role=staff.role,
-        avatar_url=staff.avatar_url,
-        work_schedule=staff.work_schedule,
-        commission_rate=float(staff.commission_rate) if staff.commission_rate else None,
-        active=staff.active,
-    )
+    return _staff_response(staff)
 
 
 @router.get("/{staff_id}", response_model=StaffResponse)
@@ -164,16 +166,7 @@ async def get_staff(
     if not staff:
         raise NotFoundError("Funcionário")
 
-    return StaffResponse(
-        id=str(staff.id),
-        name=staff.name,
-        phone=staff.phone,
-        role=staff.role,
-        avatar_url=staff.avatar_url,
-        work_schedule=staff.work_schedule,
-        commission_rate=float(staff.commission_rate) if staff.commission_rate else None,
-        active=staff.active,
-    )
+    return _staff_response(staff)
 
 
 @router.patch("/{staff_id}", response_model=StaffResponse)
@@ -205,16 +198,34 @@ async def update_staff(
     await db.commit()
     await db.refresh(staff)
 
-    return StaffResponse(
-        id=str(staff.id),
-        name=staff.name,
-        phone=staff.phone,
-        role=staff.role,
-        avatar_url=staff.avatar_url,
-        work_schedule=staff.work_schedule,
-        commission_rate=float(staff.commission_rate) if staff.commission_rate else None,
-        active=staff.active,
-    )
+    return _staff_response(staff)
+
+
+@router.post("/{staff_id}/link", response_model=StaffResponse)
+async def link_staff_user(
+    establishment_id: UUID,
+    staff_id: UUID,
+    request: StaffLinkRequest,
+    db: DBSession,
+    current_user: CurrentUser,
+) -> StaffResponse:
+    """Link staff member to a user account (grants staff RBAC)."""
+    establishment = await get_establishment_or_404(db, establishment_id)
+    check_ownership(establishment, current_user)
+
+    service = StaffService(db)
+    try:
+        staff = await service.link_user(
+            staff_id,
+            establishment_id,
+            user_id=request.user_id,
+            phone=request.phone,
+        )
+    except ValueError as e:
+        status = 404 if "não encontrado" in str(e) else 400
+        raise HTTPException(status_code=status, detail=str(e)) from e
+
+    return _staff_response(staff)
 
 
 @router.delete("/{staff_id}", status_code=204)

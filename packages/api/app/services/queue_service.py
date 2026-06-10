@@ -117,7 +117,40 @@ class QueueService:
         await self.db.commit()
         await self.db.refresh(entry)
 
+        await self._notify_queue_join(entry)
+
         return entry
+
+    async def _notify_queue_join(self, entry: QueueEntry) -> None:
+        """Notify user with queue position and estimated wait."""
+        from app.models.service import Service
+
+        avg_minutes = 20
+        if entry.service_id:
+            service = await self.db.get(Service, entry.service_id)
+            if service and service.duration_minutes:
+                avg_minutes = int(service.duration_minutes)
+
+        people_ahead = max(0, entry.position - 1)
+        eta_minutes = people_ahead * avg_minutes
+
+        message = f"Você entrou na fila na posição {entry.position}."
+        if eta_minutes > 0:
+            message += f" Tempo estimado: ~{eta_minutes} min."
+
+        notif_service = NotificationService(self.db)
+        await notif_service.notify(
+            user_id=entry.user_id,
+            title="Entrada na fila confirmada",
+            message=message,
+            type=NotificationType.queue,
+            data={
+                "establishment_id": str(entry.establishment_id),
+                "entry_id": str(entry.id),
+                "position": entry.position,
+                "eta_minutes": eta_minutes,
+            },
+        )
 
     async def update_status(
         self, entry_id: UUID, status: QueueStatus, assigned_staff_id: UUID | None = None

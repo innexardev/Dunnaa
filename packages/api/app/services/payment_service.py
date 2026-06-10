@@ -234,6 +234,10 @@ class PaymentService:
             payment = result.scalar_one_or_none()
 
             if not payment:
+                from app.services.tip_service import TipService
+
+                if await TipService(self.db).confirm_from_webhook(provider_payment_id):
+                    return
                 return
 
             if payment.status == PaymentStatus.succeeded:

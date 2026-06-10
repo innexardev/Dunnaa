@@ -7,6 +7,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from app.api.deps import CurrentUser, DBSession, verify_establishment_owner
+from app.services.audit_service import AuditService
 from app.services.payout_service import PayoutService
 
 router = APIRouter()
@@ -51,6 +52,14 @@ async def request_payout(
     service = PayoutService(db)
     try:
         payout = await service.request_payout(establishment_id, data.amount)
+        await AuditService(db).log(
+            action="payout.request",
+            resource_type="payout",
+            user_id=current_user.id,
+            resource_id=payout.id,
+            establishment_id=establishment_id,
+            metadata={"amount": data.amount},
+        )
         return payout
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

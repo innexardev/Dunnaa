@@ -53,3 +53,20 @@ async def test_assign_service_staff_forbidden(
         headers=auth_headers_second_user,
     )
     assert resp.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_link_staff_to_user(
+    client: AsyncClient,
+    auth_headers: dict,
+    auth_headers_second_user: dict,
+    establishment_id: str,
+    staff_id: str,
+):
+    resp = await client.post(
+        f"/api/v1/establishments/{establishment_id}/staff/{staff_id}/link",
+        json={"phone": "+5511977777777"},
+        headers=auth_headers,
+    )
+    assert resp.status_code == 200
+    assert resp.json()["user_id"] is not None

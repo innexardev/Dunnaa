@@ -1,5 +1,6 @@
 """Queue service unit tests."""
 
+from unittest.mock import AsyncMock, patch
 from uuid import UUID
 
 import pytest
@@ -8,6 +9,31 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from app.models.queue import QueueStatus
 from app.schemas.queue import QueueEntryCreate
 from app.services.queue_service import QueueService
+
+
+@pytest.mark.asyncio
+async def test_queue_join_sends_eta_notification(db_engine, establishment_id):
+    Session = async_sessionmaker(bind=db_engine, expire_on_commit=False)
+    est_id = UUID(str(establishment_id))
+
+    async with Session() as session:
+        from app.models.user import User
+        from sqlalchemy import select
+
+        user = (await session.execute(select(User).limit(1))).scalar_one()
+        service = QueueService(session)
+
+        with patch.object(
+            service,
+            "_notify_queue_join",
+            new=AsyncMock(),
+        ) as notify_mock:
+            entry = await service.join_queue(
+                user.id,
+                QueueEntryCreate(establishment_id=est_id),
+            )
+            notify_mock.assert_awaited_once()
+            assert entry.position == 1
 
 
 @pytest.mark.asyncio
