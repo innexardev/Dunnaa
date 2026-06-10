@@ -26,6 +26,8 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          command_timeout: 30m
           script: |
             set -e
             if [ ! -d /opt/Dunnaa/.git ]; then
