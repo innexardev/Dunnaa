@@ -153,7 +153,13 @@ async def test_checkin_consumes_subscription_credit(
         headers=auth_headers_second_user,
     )
 
-    scheduled_at = datetime.now(UTC) + timedelta(hours=2)
+    today = datetime.now(UTC)
+    days_ahead = 0 - today.weekday()
+    if days_ahead <= 0:
+        days_ahead += 7
+    next_monday = today + timedelta(days=days_ahead)
+    scheduled_at = next_monday.replace(hour=10, minute=0, second=0, microsecond=0)
+
     appt = await client.post(
         "/api/v1/appointments",
         json={

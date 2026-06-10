@@ -1,10 +1,11 @@
 """Payout service unit tests."""
 
-from uuid import UUID, uuid4
+from uuid import UUID
 
 import pytest
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
+from app.models.establishment import Establishment
 from app.models.payment import Payment, PaymentPurpose, PaymentStatus
 from app.services.payout_service import PayoutService
 
@@ -13,12 +14,14 @@ from app.services.payout_service import PayoutService
 async def test_withdrawable_balance(db_engine, establishment_id):
     Session = async_sessionmaker(bind=db_engine, expire_on_commit=False)
     async with Session() as session:
+        establishment = await session.get(Establishment, UUID(str(establishment_id)))
         payment = Payment(
             establishment_id=UUID(str(establishment_id)),
-            user_id=uuid4(),
+            user_id=establishment.owner_id,
             amount=100.0,
             net_amount=90.0,
             platform_fee=10.0,
+            gateway_fee=0.0,
             status=PaymentStatus.succeeded,
             purpose=PaymentPurpose.single,
         )
@@ -34,6 +37,21 @@ async def test_withdrawable_balance(db_engine, establishment_id):
 async def test_request_payout_minimum(db_engine, establishment_id):
     Session = async_sessionmaker(bind=db_engine, expire_on_commit=False)
     async with Session() as session:
+        establishment = await session.get(Establishment, UUID(str(establishment_id)))
+        session.add(
+            Payment(
+                establishment_id=UUID(str(establishment_id)),
+                user_id=establishment.owner_id,
+                amount=100.0,
+                net_amount=40.0,
+                platform_fee=10.0,
+                gateway_fee=0.0,
+                status=PaymentStatus.succeeded,
+                purpose=PaymentPurpose.single,
+            )
+        )
+        await session.commit()
+
         service = PayoutService(session)
         with pytest.raises(ValueError, match="mínimo"):
             await service.request_payout(UUID(str(establishment_id)), 10.0)

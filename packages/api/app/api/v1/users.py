@@ -87,6 +87,7 @@ async def update_current_user(
         avatar_url=current_user.avatar_url,
         role=current_user.role.value,
         referral_code=current_user.referral_code,
+        referred_by_id=str(current_user.referred_by_id) if current_user.referred_by_id else None,
     )
 
 

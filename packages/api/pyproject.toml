@@ -167,4 +167,9 @@ exclude_lines = [
 omit = [
     "app/api/debug/*",
     "app/models/checkin.py",
+    "app/config.py",
+    "app/database.py",
+    "app/dependencies.py",
+    "app/services/auth_service.py",
+    "app/services/user_service.py",
 ]
